@@ -1,0 +1,36 @@
+<%- include('../partials/top') %>
+<div class="col-head sticky">
+  <a class="icon-btn" href="<%= base %>/<%= item.id %>/edit" aria-label="Zpět"><%- icon('back') %></a>
+  <h1>Historie změn</h1>
+  <div class="head-actions"><a class="btn btn-sm" href="<%= entity === 'post' ? '/p/' + item.id : '/pages/' + item.slug %>"><%- icon('eye') %> Zobrazit</a></div>
+</div>
+<div class="pad">
+  <p><strong><%= item.title %></strong> · <%= revs.length %> revizí</p>
+  <ol class="timeline">
+    <% revs.forEach((r, i) => { %>
+      <li>
+        <details<%= i === 0 ? ' open' : '' %>>
+          <summary>
+            <%- include('../partials/avatar', { name: r.editor_username, display: r.editor_name }) %>
+            <span>
+              <strong>#<%= r.id %></strong> · <%= r.note || 'Upraveno' %>
+              <span class="muted">– <%= r.editor_username ? '@' + r.editor_username : 'smazaný uživatel' %>, <%= formatDate(r.created_at) %></span>
+              <% if (i === 0) { %><span class="badge badge-ok">Aktuální</span><% } %>
+            </span>
+          </summary>
+          <div class="rev-body">
+            <h3><%= r.title %></h3>
+            <div class="prose"><%- renderText(r.body) %></div>
+            <% if (i > 0) { %>
+              <form method="post" action="<%= base %>/<%= item.id %>/revisions/<%= r.id %>/restore" data-confirm="Obnovit tuto verzi? Aktuální obsah zůstane v historii.">
+                <input type="hidden" name="_csrf" value="<%= csrf %>">
+                <button class="btn btn-sm"><%- icon('history') %> Obnovit tuto verzi</button>
+              </form>
+            <% } %>
+          </div>
+        </details>
+      </li>
+    <% }) %>
+  </ol>
+</div>
+<%- include('../partials/bottom') %>

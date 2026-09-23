@@ -1,0 +1,1 @@
+<% if (name) { %><a class="avatar<%= typeof size !== 'undefined' ? ' avatar-' + size : '' %>" href="/u/<%= name %>" style="--av:<%= avatarColor(name) %>" aria-hidden="true" tabindex="-1"><%= initial(display || name) %></a><% } else { %><span class="avatar avatar-deleted" aria-hidden="true">?</span><% } %>

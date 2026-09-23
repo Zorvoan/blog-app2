@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="cs"<% if (user && user.theme !== 'system') { %> data-theme="<%= user.theme %>"<% } %>>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= title === settings.site_name ? title : title + ' · ' + settings.site_name %></title>
+  <meta name="description" content="<%= settings.site_tagline %>">
+  <meta name="theme-color" content="#1d9bf0">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="/js/app.js" defer></script>
+</head>
+<body class="<%= bare ? 'bare' : '' %>" data-user="<%= user ? user.username : '' %>">
+<div id="net-banner" class="net-banner" role="status" hidden>
+  <%- icon('offline') %><span data-net-text>Jste offline – zobrazujete uloženou verzi. Nové příspěvky se odešlou po připojení.</span>
+</div>
+<div id="outbox-banner" class="outbox-banner" role="status" hidden>
+  <%- icon('sync') %><span data-outbox-text></span>
+  <button type="button" class="btn btn-sm" data-outbox-sync>Odeslat nyní</button>
+</div>
+<% if (bare) { %>
+<main class="auth-wrap">
+<% } else { %>
+<div class="shell<%= wide ? ' wide' : '' %>">
+  <header class="sidenav">
+    <a class="brand" href="/" title="<%= settings.site_name %>">
+      <img src="/icon.svg" alt="" width="32" height="32"><span><%= settings.site_name %></span>
+    </a>
+    <nav class="nav" aria-label="Hlavní navigace">
+      <% const navLink = (href, ic, label, active) => { %>
+        <a href="<%= href %>" class="<%= active ? 'active' : '' %>"<%- active ? ' aria-current="page"' : '' %>><%- icon(ic) %><span><%= label %></span></a>
+      <% } %>
+      <% navLink('/', 'home', 'Domů', currentPath === '/') %>
+      <% navLink('/categories', 'grid', 'Rubriky', currentPath === '/categories' || currentPath.startsWith('/c/')) %>
+      <% navLink('/search', 'search', 'Hledat', currentPath === '/search') %>
+      <% if (user) { %>
+        <% navLink('/u/' + user.username, 'user', 'Profil', currentPath === '/u/' + user.username) %>
+        <div class="nav-sep">Správa</div>
+        <% navLink('/admin', 'dashboard', 'Přehled', currentPath === '/admin' || currentPath === '/admin/') %>
+        <% navLink('/admin/posts', 'post', 'Příspěvky', currentPath.startsWith('/admin/posts')) %>
+        <% navLink('/admin/pages', 'file', 'Stránky', currentPath.startsWith('/admin/pages')) %>
+        <% navLink('/admin/categories', 'folder', 'Rubriky', currentPath.startsWith('/admin/categories')) %>
+        <% navLink('/admin/tags', 'tag', 'Štítky', currentPath.startsWith('/admin/tags')) %>
+        <% if (user.role === 'admin') { navLink('/admin/users', 'users', 'Uživatelé', currentPath.startsWith('/admin/users')) } %>
+        <% navLink('/settings', 'settings', 'Nastavení', currentPath === '/settings') %>
+      <% } %>
+    </nav>
+    <% if (user) { %>
+      <a class="btn btn-primary btn-compose" href="/admin/posts/new"><%- icon('feather') %><span>Napsat</span></a>
+      <div class="me">
+        <a class="me-link" href="/u/<%= user.username %>">
+          <span class="avatar" style="--av:<%= avatarColor(user.username) %>"><%= initial(user.display_name) %></span>
+          <span class="me-names"><strong><%= user.display_name %></strong><small>@<%= user.username %><%= user.role === 'admin' ? ' · admin' : '' %></small></span>
+        </a>
+        <form method="post" action="/logout" data-logout>
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <button class="icon-btn" title="Odhlásit se" aria-label="Odhlásit se"><%- icon('logout') %></button>
+        </form>
+      </div>
+    <% } else { %>
+      <div class="guest">
+        <a class="btn btn-primary" href="/login?next=<%= encodeURIComponent(currentPath) %>">Přihlásit se</a>
+        <a class="btn" href="/register">Registrovat</a>
+      </div>
+    <% } %>
+  </header>
+  <main class="main" id="main">
+<% } %>
+<% if (flash) { %><div class="flash flash-<%= flash.type %>" role="status"><%= flash.message %></div><% } %>

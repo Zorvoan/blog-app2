@@ -1,0 +1,12 @@
+<%- include('partials/top') %>
+<div class="col-head sticky"><h1>Hledat</h1></div>
+<form class="searchbar" action="/search" method="get" role="search">
+  <input type="search" name="q" value="<%= q %>" placeholder="Hledat v titulcích a textech…" autofocus aria-label="Hledat"><button class="btn btn-primary">Hledat</button>
+</form>
+<% if (trendingTags.length) { %>
+  <section class="pad">
+    <h2 class="section-title">Oblíbené štítky</h2>
+    <div class="tags"><% trendingTags.forEach(t => { %><a href="/t/<%= encodeURIComponent(t.name) %>">#<%= t.name %></a><% }) %></div>
+  </section>
+<% } %>
+<%- include('partials/bottom') %>

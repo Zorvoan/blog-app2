@@ -1,0 +1,33 @@
+<%- include('../partials/top') %>
+<div class="col-head sticky"><h1>Štítky</h1></div>
+<div class="pad">
+  <p class="muted">Štítky vznikají automaticky z pole „Štítky“ a z #hashtagů v textu. Přejmenováním na existující název štítky sloučíte.</p>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Štítek</th><th class="num">Příspěvků</th><th>Přejmenovat / sloučit</th><th></th></tr></thead>
+    <tbody>
+    <% if (!tags.length) { %><tr><td colspan="4" class="muted center">Zatím žádné štítky.</td></tr><% } %>
+    <% tags.forEach(t => { %>
+      <tr>
+        <td><a href="/t/<%= encodeURIComponent(t.name) %>">#<%= t.name %></a></td>
+        <td class="num"><%= t.post_count %></td>
+        <td>
+          <form method="post" action="/admin/tags/<%= t.id %>" class="inline-form">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <input name="name" value="<%= t.name %>" required maxlength="40" aria-label="Nový název">
+            <button class="btn btn-sm">Uložit</button>
+          </form>
+        </td>
+        <td class="row-actions">
+          <form method="post" action="/admin/tags/<%= t.id %>/delete" data-confirm="Odstranit štítek #<%= t.name %> ze všech příspěvků?">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <button class="icon-btn sm danger" title="Smazat" aria-label="Smazat"><%- icon('trash') %></button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  </div>
+</div>
+<%- include('../partials/bottom') %>

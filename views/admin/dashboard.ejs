@@ -1,0 +1,49 @@
+<%- include('../partials/top') %>
+<div class="col-head sticky"><h1>Přehled</h1>
+  <div class="head-actions">
+    <a class="btn btn-sm btn-primary" href="/admin/posts/new"><%- icon('plus') %> Příspěvek</a>
+    <a class="btn btn-sm" href="/admin/pages/new"><%- icon('plus') %> Stránka</a>
+  </div>
+</div>
+<div class="pad">
+  <div class="stat-grid">
+    <a class="stat" href="/admin/posts?status=published"><strong><%= counts.published || 0 %></strong><span>Publikováno</span></a>
+    <a class="stat" href="/admin/posts?status=draft"><strong><%= counts.drafts || 0 %></strong><span>Koncepty</span></a>
+    <a class="stat" href="/admin/posts?trash=1"><strong><%= counts.trashed || 0 %></strong><span>V koši</span></a>
+    <a class="stat" href="/admin/pages"><strong><%= counts.pages %></strong><span>Stránky</span></a>
+    <a class="stat" href="/admin/categories"><strong><%= counts.categories %></strong><span>Rubriky</span></a>
+    <div class="stat"><strong><%= counts.comments %></strong><span>Komentáře</span></div>
+    <div class="stat"><strong><%= counts.users %></strong><span>Uživatelé</span></div>
+  </div>
+
+  <div class="two-col">
+    <section class="card">
+      <h3>Moje poslední příspěvky</h3>
+      <% if (!mine.length) { %><p class="muted">Zatím nic. <a href="/admin/posts/new">Napište první příspěvek.</a></p><% } %>
+      <ul class="plain-list">
+        <% mine.forEach(p => { %>
+          <li>
+            <a href="/admin/posts/<%= p.id %>/edit"><%= p.title %></a>
+            <% if (p.status === 'draft') { %><span class="badge badge-draft">Koncept</span><% } %>
+            <small class="muted"><%= timeAgo(p.updated_at) %></small>
+          </li>
+        <% }) %>
+      </ul>
+    </section>
+    <section class="card">
+      <h3>Poslední aktivita</h3>
+      <ul class="plain-list activity">
+        <% activity.forEach(a => { const href = a.entity === 'post' ? '/admin/posts/' + a.entity_id + '/history' : '/admin/pages/' + a.entity_id + '/history'; %>
+          <li>
+            <%- include('../partials/avatar', { name: a.editor_username, display: a.editor_name }) %>
+            <span><strong><%= a.editor_username ? '@' + a.editor_username : 'smazaný' %></strong>
+            <%= a.note.toLowerCase() %> <%= a.entity === 'post' ? 'příspěvek' : 'stránku' %>
+            <a href="<%= href %>"><%= a.title %></a>
+            <small class="muted"><%= timeAgo(a.created_at) %></small></span>
+          </li>
+        <% }) %>
+      </ul>
+    </section>
+  </div>
+</div>
+<%- include('../partials/bottom') %>

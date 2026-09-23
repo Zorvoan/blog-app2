@@ -1,0 +1,70 @@
+<%- include('partials/top') %>
+<div class="col-head sticky"><h1>Nastavení</h1></div>
+<nav class="tabs tabs-line" aria-label="Sekce nastavení">
+  <% const tabs = [['profile', 'Profil'], ['password', 'Heslo'], ['appearance', 'Vzhled'], ['account', 'Účet']]; if (user.role === 'admin') tabs.push(['site', 'Web']); %>
+  <% tabs.forEach(([key, label]) => { %><a href="/settings?tab=<%= key %>" class="<%= tab === key ? 'active' : '' %>"><%= label %></a><% }) %>
+</nav>
+<div class="pad">
+<%- include('partials/errors') %>
+
+<% if (tab === 'profile') { %>
+  <form method="post" action="/settings/profile" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label>Uživatelské jméno<input value="@<%= user.username %>" disabled><small>Uživatelské jméno nelze změnit.</small></label>
+    <label>Zobrazované jméno<input name="display_name" value="<%= user.display_name %>" required maxlength="60"></label>
+    <label>E-mail<input type="email" name="email" value="<%= user.email || '' %>"></label>
+    <label>O mně<textarea name="bio" rows="3" maxlength="500"><%= user.bio %></textarea></label>
+    <button class="btn btn-primary">Uložit profil</button>
+  </form>
+  <p class="muted small">Statistiky: <%= stats.posts %> příspěvků · <%= stats.comments %> komentářů · karma <%= stats.karma %></p>
+
+<% } else if (tab === 'password') { %>
+  <form method="post" action="/settings/password" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input type="hidden" name="username" value="<%= user.username %>" autocomplete="username">
+    <label>Současné heslo<input type="password" name="current_password" required autocomplete="current-password"></label>
+    <label>Nové heslo<input type="password" name="new_password" required minlength="8" autocomplete="new-password"></label>
+    <label>Nové heslo znovu<input type="password" name="new_password_confirm" required minlength="8" autocomplete="new-password"></label>
+    <button class="btn btn-primary">Změnit heslo</button>
+  </form>
+
+<% } else if (tab === 'appearance') { %>
+  <form method="post" action="/settings/appearance" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <fieldset class="theme-pick">
+      <legend>Motiv</legend>
+      <% [['system', 'Podle systému'], ['light', 'Světlý'], ['dark', 'Tmavý']].forEach(([v, l]) => { %>
+        <label class="radio-card theme-<%= v %>"><input type="radio" name="theme" value="<%= v %>"<%= user.theme === v ? ' checked' : '' %>><span class="swatch"></span><span><%= l %></span></label>
+      <% }) %>
+    </fieldset>
+    <button class="btn btn-primary">Uložit vzhled</button>
+  </form>
+
+<% } else if (tab === 'account') { %>
+  <section class="card">
+    <h3>Offline data</h3>
+    <p class="muted">Navštívené stránky jsou uloženy v prohlížeči pro offline čtení. Obsah napsaný offline čeká ve frontě na odeslání.</p>
+    <p><button type="button" class="btn" data-clear-cache>Vymazat offline mezipaměť</button> <span class="muted small" data-cache-status></span></p>
+  </section>
+  <section class="card danger-zone">
+    <h3>Smazat účet</h3>
+    <p class="muted">Účet bude nenávratně smazán. Vaše příspěvky zůstanou zachovány jako „smazaný uživatel“.</p>
+    <form method="post" action="/settings/delete" class="form" data-confirm="Opravdu chcete smazat svůj účet? Tuto akci nelze vrátit.">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label>Potvrďte heslem<input type="password" name="password" required autocomplete="current-password"></label>
+      <button class="btn btn-danger">Smazat účet</button>
+    </form>
+  </section>
+
+<% } else if (tab === 'site') { %>
+  <form method="post" action="/settings/site" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <label>Název webu<input name="site_name" value="<%= settings.site_name %>" required maxlength="60"></label>
+    <label>Podtitul<input name="site_tagline" value="<%= settings.site_tagline %>" maxlength="200"></label>
+    <label>Příspěvků na stránku<input type="number" name="posts_per_page" value="<%= settings.posts_per_page %>" min="5" max="100"></label>
+    <label class="check"><input type="checkbox" name="allow_registration" value="1"<%= settings.allow_registration === '1' ? ' checked' : '' %>> Povolit registraci nových uživatelů</label>
+    <button class="btn btn-primary">Uložit nastavení webu</button>
+  </form>
+<% } %>
+</div>
+<%- include('partials/bottom') %>

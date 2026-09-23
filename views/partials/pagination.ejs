@@ -1,0 +1,8 @@
+<% if (totalPages > 1) { %>
+  <% const link = (p) => { const u = new URLSearchParams(Object.entries(query).filter(([k]) => k !== 'page')); u.set('page', p); return '?' + u.toString(); } %>
+  <nav class="pager" aria-label="Stránkování">
+    <% if (page > 1) { %><a class="btn btn-sm" href="<%= link(page - 1) %>">← Novější</a><% } else { %><span></span><% } %>
+    <span class="muted">Strana <%= page %> z <%= totalPages %></span>
+    <% if (page < totalPages) { %><a class="btn btn-sm" href="<%= link(page + 1) %>">Starší →</a><% } else { %><span></span><% } %>
+  </nav>
+<% } %>

@@ -1,0 +1,30 @@
+<%- include('../partials/top') %>
+<div class="col-head sticky"><h1>Uživatelé</h1></div>
+<div class="pad">
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Uživatel</th><th>E-mail</th><th class="num">Příspěvků</th><th>Registrace</th><th>Role</th></tr></thead>
+    <tbody>
+    <% users.forEach(u => { %>
+      <tr>
+        <td class="user-cell"><%- include('../partials/avatar', { name: u.username, display: u.display_name }) %><span><strong><%= u.display_name %></strong><br><small class="muted">@<%= u.username %></small></span></td>
+        <td><%= u.email || '—' %></td>
+        <td class="num"><%= u.post_count %></td>
+        <td><small><%= formatDate(u.created_at, false) %></small></td>
+        <td>
+          <form method="post" action="/admin/users/<%= u.id %>/role" class="inline-form">
+            <input type="hidden" name="_csrf" value="<%= csrf %>">
+            <select name="role" aria-label="Role">
+              <option value="user"<%= u.role === 'user' ? ' selected' : '' %>>Uživatel</option>
+              <option value="admin"<%= u.role === 'admin' ? ' selected' : '' %>>Administrátor</option>
+            </select>
+            <button class="btn btn-sm">Uložit</button>
+          </form>
+        </td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  </div>
+</div>
+<%- include('../partials/bottom') %>

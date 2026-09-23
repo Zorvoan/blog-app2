@@ -1,0 +1,11 @@
+<form method="post" action="<%= action %>" class="form" data-offline-queue="Rubrika">
+  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <label>Název<input name="name" value="<%= form.name %>" required maxlength="60"></label>
+  <label>Adresa (slug)<input name="slug" value="<%= form.slug %>" maxlength="80" placeholder="vygeneruje se z názvu"></label>
+  <label>Popis<textarea name="description" rows="2" maxlength="500"><%= form.description %></textarea></label>
+  <div class="row">
+    <label>Barva<input type="color" name="color" value="<%= /^#[0-9a-f]{6}$/i.test(form.color || '') ? form.color : '#1d9bf0' %>"></label>
+    <label>Pořadí<input type="number" name="sort_order" value="<%= form.sort_order || 0 %>"></label>
+  </div>
+  <button class="btn btn-primary"><%= submit %></button>
+</form>

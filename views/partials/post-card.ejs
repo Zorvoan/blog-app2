@@ -1,0 +1,68 @@
+<% const isPreview = !post.id; const full = typeof fullView !== 'undefined' && fullView; %>
+<article class="post-card<%= full ? ' full' : '' %><%= post.pinned ? ' pinned' : '' %>" id="post-<%= post.id %>">
+  <div class="vote" aria-label="Hlasování">
+    <% if (user && !isPreview && post.status === 'published' && !post.deleted_at) { %>
+      <form method="post" action="/p/<%= post.id %>/vote" data-vote>
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="value" value="1">
+        <button class="vote-btn up<%= post.my_vote === 1 ? ' on' : '' %>" aria-label="Líbí se" aria-pressed="<%= post.my_vote === 1 %>"><%- icon('up') %></button>
+      </form>
+      <span class="score" data-score><%= post.score %></span>
+      <form method="post" action="/p/<%= post.id %>/vote" data-vote>
+        <input type="hidden" name="_csrf" value="<%= csrf %>"><input type="hidden" name="value" value="-1">
+        <button class="vote-btn down<%= post.my_vote === -1 ? ' on' : '' %>" aria-label="Nelíbí se" aria-pressed="<%= post.my_vote === -1 %>"><%- icon('down') %></button>
+      </form>
+    <% } else { %>
+      <span class="vote-btn" aria-hidden="true"><%- icon('up') %></span>
+      <span class="score"><%= post.score %></span>
+      <span class="vote-btn" aria-hidden="true"><%- icon('down') %></span>
+    <% } %>
+  </div>
+  <div class="post-main">
+    <header class="post-meta">
+      <%- include('avatar', { name: post.username, display: post.display_name }) %>
+      <div class="meta-text">
+        <% if (post.username) { %>
+          <a class="author" href="/u/<%= post.username %>"><%= post.display_name %></a>
+          <span class="handle">@<%= post.username %></span>
+        <% } else { %><span class="author muted">[smazaný uživatel]</span><% } %>
+        <span class="sep">·</span>
+        <time datetime="<%= post.published_at || post.created_at %>" title="<%= formatDate(post.published_at || post.created_at) %>"><%= timeAgo(post.published_at || post.created_at) %></time>
+        <% if (post.cat_slug) { %>
+          <span class="sep">·</span><a class="chip" href="/c/<%= post.cat_slug %>" style="--c:<%= post.cat_color %>">r/<%= post.cat_name %></a>
+        <% } %>
+        <% if (post.pinned) { %><span class="badge badge-pin"><%- icon('pin') %>Připnuto</span><% } %>
+        <% if (post.status === 'draft') { %><span class="badge badge-draft">Koncept</span><% } %>
+        <% if (post.deleted_at) { %><span class="badge badge-trash">V koši</span><% } %>
+      </div>
+    </header>
+    <% if (full) { %>
+      <h1 class="post-title"><%= post.title %></h1>
+    <% } else { %>
+      <h2 class="post-title"><a href="/p/<%= post.id %>"><%= post.title %></a></h2>
+    <% } %>
+    <% if (post.body) { %>
+      <div class="prose<%= full ? '' : ' clamp' %>"><%- renderText(post.body) %></div>
+    <% } %>
+    <% if (post.tags && post.tags.length) { %>
+      <div class="tags"><% post.tags.forEach(t => { %><a href="/t/<%= encodeURIComponent(t) %>">#<%= t %></a><% }) %></div>
+    <% } %>
+    <% if (post.edited_by && post.edited_by !== post.author_id && post.editor_username) { %>
+      <p class="edited"><%- icon('edit') %>Naposledy upravil(a) <a href="/u/<%= post.editor_username %>">@<%= post.editor_username %></a> · <%= timeAgo(post.updated_at) %></p>
+    <% } %>
+    <% if (!isPreview) { %>
+    <footer class="post-actions">
+      <a href="/p/<%= post.id %>#comments" class="act"><%- icon('comment') %><span><%= post.comment_count %></span></a>
+      <% if (perms.canEditPost(user, post) && !post.deleted_at) { %>
+        <a href="/admin/posts/<%= post.id %>/edit" class="act" title="Upravit"><%- icon('edit') %><span>Upravit</span></a>
+        <a href="/admin/posts/<%= post.id %>/history" class="act" title="Historie změn"><%- icon('history') %><span class="hide-sm">Historie</span></a>
+      <% } %>
+      <% if (full && perms.canDeletePost(user, post) && !post.deleted_at) { %>
+        <form method="post" action="/admin/posts/<%= post.id %>/trash" data-confirm="Přesunout příspěvek do koše?">
+          <input type="hidden" name="_csrf" value="<%= csrf %>">
+          <button class="act act-danger"><%- icon('trash') %><span>Smazat</span></button>
+        </form>
+      <% } %>
+    </footer>
+    <% } %>
+  </div>
+</article>

@@ -1,0 +1,79 @@
+<%- include('partials/top') %>
+<div class="col-head sticky">
+  <h1><%= heading %></h1>
+  <nav class="tabs" aria-label="Řazení">
+    <% Object.entries(sorts).forEach(([key, label]) => { const u = new URLSearchParams(Object.entries(query).filter(([k]) => k !== 'page' && k !== 'sort')); u.set('sort', key); %>
+      <a href="?<%= u.toString() %>" class="<%= sort === key ? 'active' : '' %>"><%= label %></a>
+    <% }) %>
+  </nav>
+</div>
+
+<% if (header && header.kind === 'category') { const c = header.cat; %>
+  <section class="banner" style="--c:<%= c.color %>">
+    <div class="banner-strip"></div>
+    <div class="banner-body">
+      <span class="cat-icon" style="--c:<%= c.color %>">r/</span>
+      <div>
+        <h2>r/<%= c.name %></h2>
+        <% if (c.description) { %><p><%= c.description %></p><% } %>
+        <small class="muted"><%= total %> příspěvků</small>
+      </div>
+      <% if (user) { %><a class="btn btn-sm" href="/admin/categories/<%= c.id %>/edit">Upravit rubriku</a><% } %>
+    </div>
+  </section>
+<% } else if (header && header.kind === 'user') { const p = header.profile; %>
+  <section class="banner profile">
+    <div class="banner-strip" style="--c:<%= avatarColor(p.username) %>"></div>
+    <div class="banner-body">
+      <%- include('partials/avatar', { name: p.username, display: p.display_name, size: 'xl' }) %>
+      <div>
+        <h2><%= p.display_name %></h2>
+        <p class="muted">@<%= p.username %><%= p.role === 'admin' ? ' · administrátor' : '' %></p>
+        <% if (p.bio) { %><p><%= p.bio %></p><% } %>
+        <p class="stats"><span><strong><%= header.stats.posts %></strong> příspěvků</span><span><strong><%= header.stats.comments %></strong> komentářů</span><span><strong><%= header.stats.karma %></strong> karma</span><span class="muted">Členem od <%= formatDate(p.created_at, false) %></span></p>
+      </div>
+      <% if (user && user.id === p.id) { %><a class="btn btn-sm" href="/settings">Upravit profil</a><% } %>
+    </div>
+  </section>
+<% } else if (header && header.kind === 'tag') { %>
+  <section class="banner slim"><div class="banner-body"><span class="cat-icon">#</span><div><h2>#<%= header.tag %></h2><small class="muted"><%= total %> příspěvků</small></div></div></section>
+<% } else if (header && header.kind === 'search') { %>
+  <form class="searchbar" action="/search" method="get">
+    <input type="search" name="q" value="<%= header.q %>" aria-label="Hledat"><button class="btn btn-primary">Hledat</button>
+  </form>
+  <p class="muted pad">Nalezeno <%= total %> výsledků pro „<%= header.q %>“.</p>
+<% } %>
+
+<% if (showCompose) { %>
+  <form class="composer" method="post" action="/admin/posts" data-offline-queue="Nový příspěvek">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <%- include('partials/avatar', { name: user.username, display: user.display_name }) %>
+    <div class="composer-main">
+      <input class="composer-title" name="title" placeholder="Titulek" required maxlength="300" aria-label="Titulek">
+      <textarea name="body" rows="2" placeholder="Co se děje? Použijte #štítky a @zmínky…" maxlength="50000" aria-label="Text příspěvku" data-autogrow></textarea>
+      <div class="composer-bar">
+        <select name="category_id" aria-label="Rubrika">
+          <option value="">Bez rubriky</option>
+          <% allCategories.forEach(c => { %><option value="<%= c.id %>"<%= typeof composeCategory !== 'undefined' && composeCategory === c.id ? ' selected' : '' %>>r/<%= c.name %></option><% }) %>
+        </select>
+        <a class="muted small" href="/admin/posts/new">Rozšířený editor</a>
+        <button class="btn btn-primary" name="status" value="published">Publikovat</button>
+      </div>
+    </div>
+  </form>
+<% } else if (!user && !header) { %>
+  <div class="card welcome">
+    <h2>Vítejte na <%= settings.site_name %></h2>
+    <p><%= settings.site_tagline %></p>
+    <p><a class="btn btn-primary" href="/register">Připojit se</a> <a class="btn" href="/login">Přihlásit se</a></p>
+  </div>
+<% } %>
+
+<div class="feed">
+  <% if (!posts.length) { %>
+    <div class="empty"><p><%= emptyText %></p><% if (user) { %><a class="btn btn-primary" href="/admin/posts/new">Napsat příspěvek</a><% } %></div>
+  <% } %>
+  <% posts.forEach(post => { %><%- include('partials/post-card', { post }) %><% }) %>
+</div>
+<%- include('partials/pagination') %>
+<%- include('partials/bottom') %>

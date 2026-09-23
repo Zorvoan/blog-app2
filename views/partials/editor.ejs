@@ -1,0 +1,24 @@
+<div class="editor" data-editor>
+  <div class="editor-tabs" role="tablist">
+    <button type="button" class="active" data-editor-tab="write" role="tab" aria-selected="true">Psát</button>
+    <button type="button" data-editor-tab="preview" role="tab" aria-selected="false">Náhled</button>
+    <span class="editor-count muted small" data-editor-count></span>
+  </div>
+  <textarea name="body" id="body" rows="<%= typeof rows !== 'undefined' ? rows : 14 %>" maxlength="<%= typeof max !== 'undefined' ? max : 50000 %>" placeholder="Pište text… (bez souborů – pouze text)" data-autogrow><%= value %></textarea>
+  <div class="editor-preview prose" data-editor-preview hidden></div>
+  <details class="help">
+    <summary>Nápověda k formátování</summary>
+    <table>
+      <tr><td><code>**tučně**</code></td><td><strong>tučně</strong></td></tr>
+      <tr><td><code>*kurzíva*</code></td><td><em>kurzíva</em></td></tr>
+      <tr><td><code>~~přeškrtnuté~~</code></td><td><del>přeškrtnuté</del></td></tr>
+      <tr><td><code>`kód`</code></td><td><code>kód</code></td></tr>
+      <tr><td><code>[text](https://…)</code></td><td>odkaz</td></tr>
+      <tr><td><code># Nadpis</code></td><td>nadpis (#, ##, ###)</td></tr>
+      <tr><td><code>- položka</code> / <code>1. položka</code></td><td>seznam</td></tr>
+      <tr><td><code>&gt; citace</code></td><td>citace</td></tr>
+      <tr><td><code>```</code> … <code>```</code></td><td>blok kódu</td></tr>
+      <tr><td><code>#štítek</code>, <code>@uživatel</code></td><td>štítek, zmínka</td></tr>
+    </table>
+  </details>
+</div>

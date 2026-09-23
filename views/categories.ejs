@@ -1,0 +1,14 @@
+<%- include('partials/top') %>
+<div class="col-head sticky"><h1>Rubriky</h1></div>
+<div class="cat-grid">
+  <% if (!allCategories.length) { %><div class="empty"><p>Zatím žádné rubriky.</p></div><% } %>
+  <% allCategories.forEach(c => { %>
+    <a class="cat-tile" href="/c/<%= c.slug %>" style="--c:<%= c.color %>">
+      <span class="cat-icon">r/</span>
+      <span><strong>r/<%= c.name %></strong><small><%= c.description || 'Bez popisu' %></small></span>
+      <span class="count"><%= c.post_count %></span>
+    </a>
+  <% }) %>
+</div>
+<% if (user) { %><p class="pad"><a class="btn" href="/admin/categories"><%- icon('plus') %> Nová rubrika</a></p><% } %>
+<%- include('partials/bottom') %>

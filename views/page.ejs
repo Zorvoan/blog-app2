@@ -1,0 +1,14 @@
+<%- include('partials/top') %>
+<div class="col-head sticky">
+  <h1><%= page.title || 'Bez názvu' %></h1>
+</div>
+<%- include('partials/preview-banner') %>
+<article class="page-view">
+  <div class="prose"><%- renderText(page.body) %></div>
+  <footer class="page-foot muted small">
+    Aktualizováno <%= formatDate(page.updated_at) %>
+    <% if (page.editor_username) { %> uživatelem <a href="/u/<%= page.editor_username %>">@<%= page.editor_username %></a><% } else if (page.username) { %> · autor <a href="/u/<%= page.username %>">@<%= page.username %></a><% } %>
+    <% if (user && page.id && !preview) { %> · <a href="/admin/pages/<%= page.id %>/edit">Upravit stránku</a><% } %>
+  </footer>
+</article>
+<%- include('partials/bottom') %>

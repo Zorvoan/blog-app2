@@ -1,0 +1,10 @@
+<% if (preview) { %>
+  <div class="preview-banner" role="note">
+    <%- icon('eye') %>
+    <% if (preview === 'unsaved') { %>
+      <span><strong>Náhled</strong> – obsah zatím není uložen. Zavřete tuto kartu a pokračujte v editaci.</span>
+    <% } else { %>
+      <span><strong>Náhled</strong> – tento obsah není veřejně zobrazen (koncept<%= typeof post !== 'undefined' && post.deleted_at ? ' / v koši' : '' %>).</span>
+    <% } %>
+  </div>
+<% } %>

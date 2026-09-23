@@ -1,0 +1,26 @@
+<%- include('../partials/top') %>
+<div class="col-head sticky">
+  <a class="icon-btn" href="/admin/categories" aria-label="Zpět"><%- icon('back') %></a>
+  <h1>Upravit rubriku</h1>
+  <div class="head-actions"><a class="btn btn-sm" href="/c/<%= cat.slug %>"><%- icon('eye') %> Zobrazit</a></div>
+</div>
+<div class="pad narrow">
+  <%- include('../partials/errors') %>
+  <%- include('category-fields', { action: '/admin/categories/' + cat.id, submit: 'Uložit rubriku' }) %>
+  <% if (perms.canDeleteCategory(user, cat)) { %>
+    <section class="card danger-zone">
+      <h3>Smazat rubriku</h3>
+      <form method="post" action="/admin/categories/<%= cat.id %>/delete" class="form" data-confirm="Smazat rubriku r/<%= cat.name %>?">
+        <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <label>Příspěvky přesunout do
+          <select name="move_to">
+            <option value="">Bez rubriky</option>
+            <% allCategories.filter(c => c.id !== cat.id).forEach(c => { %><option value="<%= c.id %>">r/<%= c.name %></option><% }) %>
+          </select>
+        </label>
+        <button class="btn btn-danger">Smazat rubriku</button>
+      </form>
+    </section>
+  <% } %>
+</div>
+<%- include('../partials/bottom') %>

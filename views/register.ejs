@@ -1,0 +1,23 @@
+<%- include('partials/top') %>
+<div class="auth-card">
+  <a class="auth-logo" href="/"><img src="/icon.svg" alt="" width="48" height="48"></a>
+  <h1>Vytvořit účet</h1>
+  <% if (firstUser) { %><div class="flash flash-info">Jste první uživatel – získáte roli administrátora.</div><% } %>
+  <% if (!open) { %>
+    <div class="flash flash-error">Registrace nových uživatelů je momentálně vypnutá.</div>
+  <% } else { %>
+    <%- include('partials/errors') %>
+    <form method="post" action="/register" class="form">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <label>Uživatelské jméno<input name="username" value="<%= form.username || '' %>" required pattern="[A-Za-z0-9_]{3,30}" autocomplete="username" autofocus>
+        <small>3–30 znaků: písmena bez diakritiky, číslice, podtržítko.</small></label>
+      <label>Zobrazované jméno<input name="display_name" value="<%= form.display_name || '' %>" maxlength="60" autocomplete="name"></label>
+      <label>E-mail <span class="muted">(nepovinné)</span><input type="email" name="email" value="<%= form.email || '' %>" autocomplete="email"></label>
+      <label>Heslo<input type="password" name="password" required minlength="8" autocomplete="new-password"></label>
+      <label>Heslo znovu<input type="password" name="password_confirm" required minlength="8" autocomplete="new-password"></label>
+      <button class="btn btn-primary btn-block">Registrovat</button>
+    </form>
+  <% } %>
+  <p class="muted center">Už máte účet? <a href="/login">Přihlaste se</a></p>
+</div>
+<%- include('partials/bottom') %>

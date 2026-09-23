@@ -1,0 +1,16 @@
+<%- include('partials/top') %>
+<div class="auth-card">
+  <a class="auth-logo" href="/"><img src="/icon.svg" alt="" width="48" height="48"></a>
+  <h1>Přihlášení do <%= settings.site_name %></h1>
+  <% if (error) { %><div class="flash flash-error" role="alert"><%= error %></div><% } %>
+  <form method="post" action="/login" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input type="hidden" name="next" value="<%= next %>">
+    <label>Uživatelské jméno nebo e-mail<input name="login" value="<%= login %>" required autocomplete="username" autofocus></label>
+    <label>Heslo<input type="password" name="password" required autocomplete="current-password"></label>
+    <button class="btn btn-primary btn-block">Přihlásit se</button>
+  </form>
+  <p class="muted center">Nemáte účet? <a href="/register">Zaregistrujte se</a></p>
+  <p class="center"><a class="small" href="/">← Pokračovat bez přihlášení</a></p>
+</div>
+<%- include('partials/bottom') %>

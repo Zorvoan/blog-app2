@@ -1,0 +1,32 @@
+<%- include('../partials/top') %>
+<div class="col-head sticky"><h1>Rubriky</h1></div>
+<div class="pad two-col">
+  <section>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Rubrika</th><th>Adresa</th><th class="num">Příspěvků</th><th class="num">Pořadí</th><th></th></tr></thead>
+      <tbody>
+      <% if (!allCategories.length) { %><tr><td colspan="5" class="muted center">Zatím žádné rubriky.</td></tr><% } %>
+      <% allCategories.forEach(c => { %>
+        <tr>
+          <td><span class="chip" style="--c:<%= c.color %>">r/<%= c.name %></span><% if (c.description) { %><div class="muted small"><%= c.description %></div><% } %></td>
+          <td><code>/c/<%= c.slug %></code></td>
+          <td class="num"><a href="/admin/posts?category=<%= c.id %>"><%= c.post_count %></a></td>
+          <td class="num"><%= c.sort_order %></td>
+          <td class="row-actions">
+            <a class="icon-btn sm" href="/c/<%= c.slug %>" title="Zobrazit"><%- icon('eye') %></a>
+            <a class="icon-btn sm" href="/admin/categories/<%= c.id %>/edit" title="Upravit"><%- icon('edit') %></a>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+    </div>
+  </section>
+  <section class="card">
+    <h3>Nová rubrika</h3>
+    <%- include('../partials/errors') %>
+    <%- include('category-fields', { action: '/admin/categories', submit: 'Vytvořit rubriku' }) %>
+  </section>
+</div>
+<%- include('../partials/bottom') %>

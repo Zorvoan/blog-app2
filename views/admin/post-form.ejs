@@ -1,0 +1,68 @@
+<%- include('../partials/top') %>
+<% const editing = !!post; const own = !editing || perms.canDeletePost(user, post); %>
+<div class="col-head sticky">
+  <a class="icon-btn" href="/admin/posts" aria-label="Zpět"><%- icon('back') %></a>
+  <h1><%= editing ? 'Upravit příspěvek' : 'Nový příspěvek' %></h1>
+  <% if (editing) { %>
+    <div class="head-actions">
+      <a class="btn btn-sm" href="/p/<%= post.id %>"><%- icon('eye') %> Zobrazit</a>
+      <a class="btn btn-sm" href="/admin/posts/<%= post.id %>/history"><%- icon('history') %> Historie</a>
+    </div>
+  <% } %>
+</div>
+<div class="pad">
+  <%- include('../partials/errors') %>
+  <% if (editing && post.author_id !== user.id) { %>
+    <div class="flash flash-info">Upravujete příspěvek uživatele <strong>@<%= post.username || 'smazaný' %></strong>. Změna bude zaznamenána v historii revizí a lze ji kdykoliv vrátit.</div>
+  <% } %>
+  <form method="post" action="<%= editing ? '/admin/posts/' + post.id : '/admin/posts' %>" class="form editor-layout" data-offline-queue="<%= editing ? 'Úprava příspěvku' : 'Nový příspěvek' %>">
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input type="hidden" name="type" value="post">
+    <% if (editing) { %><input type="hidden" name="id" value="<%= post.id %>"><% } %>
+    <div class="editor-main">
+      <label>Titulek<input name="title" value="<%= form.title %>" required maxlength="300" class="input-lg" autofocus></label>
+      <label for="body">Text</label>
+      <%- include('../partials/editor', { value: form.body }) %>
+    </div>
+    <aside class="editor-side card">
+      <% if (own) { %>
+        <label>Stav
+          <select name="status">
+            <option value="published"<%= form.status === 'published' ? ' selected' : '' %>>Publikováno</option>
+            <option value="draft"<%= form.status === 'draft' ? ' selected' : '' %>>Koncept</option>
+          </select>
+        </label>
+      <% } else { %>
+        <p class="muted small">Stav: <strong><%= post.status === 'draft' ? 'Koncept' : 'Publikováno' %></strong> (mění jen autor)</p>
+      <% } %>
+      <label>Rubrika
+        <select name="category_id">
+          <option value="">Bez rubriky</option>
+          <% allCategories.forEach(c => { %><option value="<%= c.id %>"<%= String(form.category_id) === String(c.id) ? ' selected' : '' %>>r/<%= c.name %></option><% }) %>
+        </select>
+      </label>
+      <label>Štítky<input name="tags" value="<%= form.tags %>" placeholder="např. novinky, tipy" maxlength="500"><small>Oddělte čárkou. #hashtagy z textu se přidají automaticky.</small></label>
+      <% if (perms.canPinPost(user)) { %>
+        <label class="check"><input type="checkbox" name="pinned" value="1"<%= form.pinned ? ' checked' : '' %>> Připnout nahoru</label>
+      <% } %>
+      <% if (editing) { %>
+        <label>Popis změny <span class="muted">(nepovinné)</span><input name="note" maxlength="200" placeholder="např. oprava překlepů"></label>
+      <% } %>
+      <div class="btn-col">
+        <button class="btn btn-primary btn-block"><%= editing ? 'Uložit' : 'Uložit a zobrazit' %></button>
+        <button class="btn btn-block" name="after" value="edit">Uložit a pokračovat</button>
+        <button class="btn btn-block" formaction="/admin/preview" formtarget="_blank" formnovalidate data-no-queue><%- icon('eye') %> Náhled</button>
+      </div>
+      <% if (editing) { %>
+        <p class="muted small">Vytvořeno <%= formatDate(post.created_at) %><% if (post.username) { %> uživatelem @<%= post.username %><% } %>.<br>Naposledy upraveno <%= formatDate(post.updated_at) %>.</p>
+      <% } %>
+    </aside>
+  </form>
+  <% if (editing && perms.canDeletePost(user, post)) { %>
+    <form method="post" action="/admin/posts/<%= post.id %>/trash" data-confirm="Přesunout příspěvek do koše?" class="danger-row">
+      <input type="hidden" name="_csrf" value="<%= csrf %>">
+      <button class="btn btn-danger btn-sm"><%- icon('trash') %> Přesunout do koše</button>
+    </form>
+  <% } %>
+</div>
+<%- include('../partials/bottom') %>

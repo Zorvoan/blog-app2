@@ -1,0 +1,45 @@
+<%- include('../partials/top') %>
+<div class="col-head sticky"><h1>Stránky</h1>
+  <div class="head-actions"><a class="btn btn-sm btn-primary" href="/admin/pages/new"><%- icon('plus') %> Nová stránka</a></div>
+</div>
+<div class="pad">
+  <form class="filters" method="get">
+    <input type="search" name="q" value="<%= f.q %>" placeholder="Hledat stránky…" aria-label="Hledat">
+    <select name="status" aria-label="Stav">
+      <option value="all">Všechny stavy</option>
+      <option value="published"<%= f.status === 'published' ? ' selected' : '' %>>Publikováno</option>
+      <option value="draft"<%= f.status === 'draft' ? ' selected' : '' %>>Koncept</option>
+    </select>
+    <button class="btn btn-sm">Filtrovat</button>
+  </form>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Název</th><th>Adresa</th><th>Stav</th><th>V navigaci</th><th class="num">Pořadí</th><th>Upraveno</th><th></th></tr></thead>
+    <tbody>
+    <% if (!pages.length) { %><tr><td colspan="7" class="muted center">Žádné stránky. <a href="/admin/pages/new">Vytvořit první.</a></td></tr><% } %>
+    <% pages.forEach(p => { %>
+      <tr>
+        <td><a href="/admin/pages/<%= p.id %>/edit"><strong><%= p.title %></strong></a></td>
+        <td><code>/pages/<%= p.slug %></code></td>
+        <td><span class="badge <%= p.status === 'draft' ? 'badge-draft' : 'badge-ok' %>"><%= p.status === 'draft' ? 'Koncept' : 'Publikováno' %></span></td>
+        <td><%= p.show_in_nav ? 'Ano' : 'Ne' %></td>
+        <td class="num"><%= p.sort_order %></td>
+        <td><small><%= timeAgo(p.updated_at) %><% if (p.editor_username) { %> · @<%= p.editor_username %><% } %></small></td>
+        <td class="row-actions">
+          <a class="icon-btn sm" href="/pages/<%= p.slug %>" title="Zobrazit"><%- icon('eye') %></a>
+          <a class="icon-btn sm" href="/admin/pages/<%= p.id %>/edit" title="Upravit"><%- icon('edit') %></a>
+          <a class="icon-btn sm" href="/admin/pages/<%= p.id %>/history" title="Historie"><%- icon('history') %></a>
+          <% if (perms.canDeletePage(user, p)) { %>
+            <form method="post" action="/admin/pages/<%= p.id %>/delete" data-confirm="Smazat stránku „<%= p.title %>“?">
+              <input type="hidden" name="_csrf" value="<%= csrf %>">
+              <button class="icon-btn sm danger" title="Smazat" aria-label="Smazat"><%- icon('trash') %></button>
+            </form>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  </div>
+</div>
+<%- include('../partials/bottom') %>

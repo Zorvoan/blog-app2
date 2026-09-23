@@ -1,0 +1,51 @@
+<% if (bare) { %>
+</main>
+<% } else { %>
+  </main>
+  <% if (!wide) { %>
+  <aside class="rightbar">
+    <form class="searchbox" action="/search" method="get" role="search">
+      <%- icon('search') %><input type="search" name="q" placeholder="Hledat příspěvky" value="<%= typeof q === 'string' ? q : '' %>" aria-label="Hledat">
+    </form>
+    <section class="card">
+      <h3>Rubriky</h3>
+      <% if (!allCategories.length) { %><p class="muted">Zatím žádné rubriky.</p><% } %>
+      <ul class="cat-list">
+        <% allCategories.forEach(c => { %>
+          <li><a href="/c/<%= c.slug %>"><span class="dot" style="--c:<%= c.color %>"></span><span>r/<%= c.name %></span><small><%= c.post_count %></small></a></li>
+        <% }) %>
+      </ul>
+      <% if (user) { %><a class="card-more" href="/admin/categories">Spravovat rubriky</a><% } %>
+    </section>
+    <% if (trendingTags.length) { %>
+    <section class="card">
+      <h3>Trendy</h3>
+      <ul class="trend-list">
+        <% trendingTags.forEach(t => { %>
+          <li><a href="/t/<%= encodeURIComponent(t.name) %>"><strong>#<%= t.name %></strong><small><%= t.n %> příspěvků</small></a></li>
+        <% }) %>
+      </ul>
+    </section>
+    <% } %>
+    <footer class="site-foot">
+      <% navPages.forEach(p => { %><a href="/pages/<%= p.slug %>"><%= p.title %></a><% }) %>
+      <span>© <%= new Date().getFullYear() %> <%= settings.site_name %></span>
+    </footer>
+  </aside>
+  <% } %>
+</div>
+<nav class="tabbar" aria-label="Mobilní navigace">
+  <a href="/" class="<%= currentPath === '/' ? 'active' : '' %>" aria-label="Domů"><%- icon('home') %></a>
+  <a href="/categories" aria-label="Rubriky"><%- icon('grid') %></a>
+  <% if (user) { %>
+    <a href="/admin/posts/new" class="tab-compose" aria-label="Napsat"><%- icon('plus') %></a>
+    <a href="/admin" aria-label="Správa"><%- icon('dashboard') %></a>
+    <a href="/settings" aria-label="Nastavení"><%- icon('settings') %></a>
+  <% } else { %>
+    <a href="/search" aria-label="Hledat"><%- icon('search') %></a>
+    <a href="/login" aria-label="Přihlásit"><%- icon('login') %></a>
+  <% } %>
+</nav>
+<% } %>
+</body>
+</html>

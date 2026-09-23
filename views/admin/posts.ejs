@@ -1,0 +1,101 @@
+<%- include('../partials/top') %>
+<div class="col-head sticky"><h1>Příspěvky</h1>
+  <div class="head-actions"><a class="btn btn-sm btn-primary" href="/admin/posts/new"><%- icon('plus') %> Nový příspěvek</a></div>
+</div>
+<nav class="tabs tabs-line">
+  <a href="/admin/posts" class="<%= !f.trash && f.status === 'all' && !f.mine ? 'active' : '' %>">Vše</a>
+  <a href="/admin/posts?status=published" class="<%= !f.trash && f.status === 'published' ? 'active' : '' %>">Publikované (<%= counts.published || 0 %>)</a>
+  <a href="/admin/posts?status=draft" class="<%= !f.trash && f.status === 'draft' ? 'active' : '' %>">Koncepty</a>
+  <a href="/admin/posts?mine=1" class="<%= !f.trash && f.mine && f.status === 'all' ? 'active' : '' %>">Moje</a>
+  <a href="/admin/posts?trash=1" class="<%= f.trash ? 'active' : '' %>">Koš</a>
+</nav>
+<div class="pad">
+  <form class="filters" method="get" action="/admin/posts">
+    <% if (f.trash) { %><input type="hidden" name="trash" value="1"><% } %>
+    <% if (f.mine) { %><input type="hidden" name="mine" value="1"><% } %>
+    <input type="search" name="q" value="<%= f.q %>" placeholder="Hledat…" aria-label="Hledat">
+    <select name="status" aria-label="Stav">
+      <option value="all">Všechny stavy</option>
+      <option value="published"<%= f.status === 'published' ? ' selected' : '' %>>Publikováno</option>
+      <option value="draft"<%= f.status === 'draft' ? ' selected' : '' %>>Koncept</option>
+    </select>
+    <select name="category" aria-label="Rubrika">
+      <option value="">Všechny rubriky</option>
+      <option value="none"<%= f.category === 'none' ? ' selected' : '' %>>Bez rubriky</option>
+      <% allCategories.forEach(c => { %><option value="<%= c.id %>"<%= f.category === c.id ? ' selected' : '' %>>r/<%= c.name %></option><% }) %>
+    </select>
+    <select name="sort" aria-label="Řazení">
+      <% [['updated', 'Naposledy upravené'], ['new', 'Nejnovější'], ['top', 'Hodnocení'], ['title', 'Podle názvu']].forEach(([v, l]) => { %><option value="<%= v %>"<%= f.sort === v ? ' selected' : '' %>><%= l %></option><% }) %>
+    </select>
+    <button class="btn btn-sm">Filtrovat</button>
+  </form>
+
+  <form method="post" action="/admin/posts/bulk" id="bulk" data-bulk>
+    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <input type="hidden" name="back" value="<%= currentPath %>?<%= new URLSearchParams(query).toString() %>">
+    <div class="bulk-bar">
+      <select name="action" aria-label="Hromadná akce" required>
+        <option value="">Hromadná akce…</option>
+        <% if (f.trash) { %>
+          <option value="restore">Obnovit</option>
+          <option value="destroy">Smazat trvale</option>
+        <% } else { %>
+          <option value="publish">Publikovat</option>
+          <option value="draft">Změnit na koncept</option>
+          <option value="move">Přesunout do rubriky →</option>
+          <option value="trash">Přesunout do koše</option>
+        <% } %>
+      </select>
+      <% if (!f.trash) { %>
+      <select name="category_id" aria-label="Cílová rubrika">
+        <option value="none">Bez rubriky</option>
+        <% allCategories.forEach(c => { %><option value="<%= c.id %>">r/<%= c.name %></option><% }) %>
+      </select>
+      <% } %>
+      <button class="btn btn-sm">Provést</button>
+      <span class="muted small"><%= total %> příspěvků</span>
+    </div>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr>
+        <th class="w-check"><input type="checkbox" data-check-all aria-label="Vybrat vše"></th>
+        <th>Titulek</th><th>Autor</th><th>Rubrika</th><th>Stav</th><th class="num">Skóre</th><th>Upraveno</th><th></th>
+      </tr></thead>
+      <tbody>
+      <% if (!posts.length) { %><tr><td colspan="8" class="muted center">Žádné příspěvky.</td></tr><% } %>
+      <% posts.forEach(p => { %>
+        <tr>
+          <td><input type="checkbox" name="ids" value="<%= p.id %>" aria-label="Vybrat"></td>
+          <td class="title-cell">
+            <a href="<%= f.trash ? '/p/' + p.id : '/admin/posts/' + p.id + '/edit' %>"><strong><%= p.title %></strong></a>
+            <% if (p.pinned) { %><span class="badge badge-pin">Připnuto</span><% } %>
+            <% if (p.tags.length) { %><div class="tags small"><% p.tags.forEach(t => { %><span>#<%= t %></span><% }) %></div><% } %>
+          </td>
+          <td><%= p.username ? '@' + p.username : '—' %></td>
+          <td><% if (p.cat_name) { %><span class="chip" style="--c:<%= p.cat_color %>">r/<%= p.cat_name %></span><% } else { %><span class="muted">—</span><% } %></td>
+          <td><span class="badge <%= p.status === 'draft' ? 'badge-draft' : 'badge-ok' %>"><%= p.status === 'draft' ? 'Koncept' : 'Publikováno' %></span></td>
+          <td class="num"><%= p.score %></td>
+          <td><small title="<%= formatDate(p.updated_at) %>"><%= timeAgo(p.updated_at) %><% if (p.editor_username && p.edited_by !== p.author_id) { %><br>@<%= p.editor_username %><% } %></small></td>
+          <td class="row-actions">
+            <% if (f.trash) { %>
+              <% if (perms.canDeletePost(user, p)) { %>
+                <button class="icon-btn sm" form="restore-<%= p.id %>" title="Obnovit" aria-label="Obnovit"><%- icon('sync') %></button>
+              <% } %>
+            <% } else { %>
+              <a class="icon-btn sm" href="/p/<%= p.id %>" title="Zobrazit"><%- icon('eye') %></a>
+              <% if (perms.canEditPost(user, p)) { %><a class="icon-btn sm" href="/admin/posts/<%= p.id %>/edit" title="Upravit"><%- icon('edit') %></a>
+              <a class="icon-btn sm" href="/admin/posts/<%= p.id %>/history" title="Historie"><%- icon('history') %></a><% } %>
+            <% } %>
+          </td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+    </div>
+  </form>
+  <% if (f.trash) { posts.filter(p => perms.canDeletePost(user, p)).forEach(p => { %>
+    <form method="post" action="/admin/posts/<%= p.id %>/restore" id="restore-<%= p.id %>" hidden><input type="hidden" name="_csrf" value="<%= csrf %>"></form>
+  <% }) } %>
+  <%- include('../partials/pagination') %>
+</div>
+<%- include('../partials/bottom') %>

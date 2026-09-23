@@ -1,0 +1,9 @@
+<%- include('partials/top', { bare: true, user: null, flash: null }) %>
+<div class="auth-card">
+  <div class="auth-logo"><img src="/icon.svg" alt="" width="48" height="48"></div>
+  <h1>Jste offline</h1>
+  <p class="muted">Tato stránka zatím nebyla uložena pro offline použití. Stránky, které jste již navštívili, jsou dostupné i bez připojení.</p>
+  <p class="muted">Příspěvky a komentáře napsané offline se uloží do fronty a odešlou se automaticky po obnovení spojení.</p>
+  <p><a class="btn btn-primary" href="/">Zkusit hlavní stránku</a></p>
+</div>
+<%- include('partials/bottom', { bare: true }) %>
