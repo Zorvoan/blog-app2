@@ -2,7 +2,46 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
-const { DatabaseSync } = require('node:sqlite');
+
+// Ovladač SQLite:
+//  1. vestavěný `node:sqlite` (Node.js 22.13+) – bez jakýchkoliv závislostí,
+//  2. jinak volitelný balíček `better-sqlite3` (starší Node.js 18/20).
+// Lze vynutit proměnnou prostředí SQLITE_DRIVER=node|better-sqlite3.
+function loadDriver() {
+  const wanted = process.env.SQLITE_DRIVER;
+  const errors = [];
+  if (wanted !== 'better-sqlite3') {
+    try {
+      // Potlačit hlášku "SQLite is an experimental feature" – ostatní varování ponechat.
+      const emit = process.emitWarning;
+      process.emitWarning = (warning, ...rest) => {
+        if (String(warning?.message ?? warning).includes('SQLite is an experimental feature')) return;
+        return emit.call(process, warning, ...rest);
+      };
+      const { DatabaseSync } = require('node:sqlite');
+      return { name: 'node:sqlite', open: (file) => new DatabaseSync(file) };
+    } catch (err) {
+      errors.push(`node:sqlite: ${err.message}`);
+    }
+  }
+  if (wanted !== 'node') {
+    try {
+      const Database = require('better-sqlite3');
+      return { name: 'better-sqlite3', open: (file) => new Database(file) };
+    } catch (err) {
+      errors.push(`better-sqlite3: ${err.message}`);
+    }
+  }
+  const msg = [
+    `Nelze načíst SQLite (Node.js ${process.version}).`,
+    'Řešení: nainstalujte Node.js 22 LTS nebo novější (https://nodejs.org),',
+    'nebo na starším Node.js spusťte "npm install better-sqlite3".',
+    ...errors.map((e) => `  - ${e}`),
+  ].join('\n');
+  throw new Error(msg);
+}
+
+let driver;
 
 const SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
@@ -115,7 +154,9 @@ CREATE TABLE IF NOT EXISTS settings (
 
 function openDb(file) {
   if (file !== ':memory:') fs.mkdirSync(path.dirname(file), { recursive: true });
-  const db = new DatabaseSync(file);
+  driver ??= loadDriver();
+  const db = driver.open(file);
+  db.driverName = driver.name;
   db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
   db.exec(SCHEMA);
 

@@ -6,8 +6,13 @@ a aplikace **funguje i offline**.
 
 ## Spuštění
 
-Potřebujete Node.js **22.13 nebo novější** (používá vestavěný modul `node:sqlite`, takže
-nejsou potřeba žádné nativní závislosti ani databázový server).
+Potřebujete Node.js **18.18 nebo novější** (verzi zjistíte příkazem `node -v`).
+
+- Na Node.js **22.13+** se použije vestavěný modul `node:sqlite` – bez dalších závislostí.
+- Na starším Node.js (18, 20) se automaticky použije balíček `better-sqlite3`, který
+  `npm install` nainstaluje jako volitelnou závislost (předkompilovaný i pro Windows).
+- Pokud se `better-sqlite3` nepodaří nainstalovat (např. firemní proxy blokuje stažení),
+  nainstalujte Node.js 22 LTS z https://nodejs.org.
 
 ```bash
 npm install
@@ -25,6 +30,7 @@ Proměnné prostředí:
 | `HOST`          | `127.0.0.1`       | adresa, na které server naslouchá                |
 | `DB_FILE`       | `data/blog.db`    | cesta k souboru SQLite databáze                  |
 | `COOKIE_SECURE` | –                 | `1` = cookie jen přes HTTPS (za reverzní proxy)  |
+| `SQLITE_DRIVER` | automaticky       | vynucení ovladače: `node` nebo `better-sqlite3`  |
 
 Testy: `npm test`
 
