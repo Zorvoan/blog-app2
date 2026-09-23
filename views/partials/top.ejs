@@ -39,10 +39,12 @@
         <div class="nav-sep">Správa</div>
         <% navLink('/admin', 'dashboard', 'Přehled', currentPath === '/admin' || currentPath === '/admin/') %>
         <% navLink('/admin/posts', 'post', 'Příspěvky', currentPath.startsWith('/admin/posts')) %>
-        <% navLink('/admin/pages', 'file', 'Stránky', currentPath.startsWith('/admin/pages')) %>
-        <% navLink('/admin/categories', 'folder', 'Rubriky', currentPath.startsWith('/admin/categories')) %>
-        <% navLink('/admin/tags', 'tag', 'Štítky', currentPath.startsWith('/admin/tags')) %>
-        <% if (user.role === 'admin') { navLink('/admin/users', 'users', 'Uživatelé', currentPath.startsWith('/admin/users')) } %>
+        <% if (user.role === 'admin') { %>
+          <% navLink('/admin/pages', 'file', 'Stránky', currentPath.startsWith('/admin/pages')) %>
+          <% navLink('/admin/categories', 'folder', 'Rubriky', currentPath.startsWith('/admin/categories')) %>
+          <% navLink('/admin/tags', 'tag', 'Štítky', currentPath.startsWith('/admin/tags')) %>
+          <% navLink('/admin/users', 'users', 'Uživatelé', currentPath.startsWith('/admin/users')) %>
+        <% } %>
         <% navLink('/settings', 'settings', 'Nastavení', currentPath === '/settings') %>
       <% } %>
     </nav>

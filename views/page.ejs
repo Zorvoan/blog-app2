@@ -8,7 +8,7 @@
   <footer class="page-foot muted small">
     Aktualizováno <%= formatDate(page.updated_at) %>
     <% if (page.editor_username) { %> uživatelem <a href="/u/<%= page.editor_username %>">@<%= page.editor_username %></a><% } else if (page.username) { %> · autor <a href="/u/<%= page.username %>">@<%= page.username %></a><% } %>
-    <% if (user && page.id && !preview) { %> · <a href="/admin/pages/<%= page.id %>/edit">Upravit stránku</a><% } %>
+    <% if (perms.canEditPage(user) && page.id && !preview) { %> · <a href="/admin/pages/<%= page.id %>/edit">Upravit stránku</a><% } %>
   </footer>
 </article>
 <%- include('partials/bottom') %>

@@ -10,5 +10,5 @@
     </a>
   <% }) %>
 </div>
-<% if (user) { %><p class="pad"><a class="btn" href="/admin/categories"><%- icon('plus') %> Nová rubrika</a></p><% } %>
+<% if (perms.canEditCategory(user)) { %><p class="pad"><a class="btn" href="/admin/categories"><%- icon('plus') %> Nová rubrika</a></p><% } %>
 <%- include('partials/bottom') %>

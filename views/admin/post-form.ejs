@@ -13,7 +13,7 @@
 <div class="pad">
   <%- include('../partials/errors') %>
   <% if (editing && post.author_id !== user.id) { %>
-    <div class="flash flash-info">Upravujete příspěvek uživatele <strong>@<%= post.username || 'smazaný' %></strong>. Změna bude zaznamenána v historii revizí a lze ji kdykoliv vrátit.</div>
+    <div class="flash flash-info">Jako administrátor upravujete příspěvek uživatele <strong>@<%= post.username || 'smazaný' %></strong>. Změna bude zaznamenána v historii revizí a lze ji kdykoliv vrátit.</div>
   <% } %>
   <form method="post" action="<%= editing ? '/admin/posts/' + post.id : '/admin/posts' %>" class="form editor-layout" data-offline-queue="<%= editing ? 'Úprava příspěvku' : 'Nový příspěvek' %>">
     <input type="hidden" name="_csrf" value="<%= csrf %>">

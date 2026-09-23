@@ -44,6 +44,16 @@ Testy: `npm test`
 - administrátor navíc: název a popis webu, počet příspěvků na stránku, zapnutí/vypnutí registrace,
   správa rolí uživatelů
 
+**Role**
+
+| | Běžný uživatel | Administrátor |
+|---|---|---|
+| psát příspěvky a komentáře, hlasovat | ✔ | ✔ |
+| upravovat / mazat **své** příspěvky a komentáře | ✔ | ✔ |
+| upravovat / mazat **cizí** příspěvky a komentáře | ✘ | ✔ |
+| stránky, rubriky, štítky | ✘ | ✔ |
+| uživatelé a nastavení webu | ✘ | ✔ |
+
 **Příspěvky** – vytváří se jako **text** (žádné nahrávání souborů, žádná knihovna médií)
 - rychlé psaní přímo z hlavní stránky (jako tweet) i rozšířený editor
 - formátování: `**tučně**`, `*kurzíva*`, `` `kód` ``, odkazy, nadpisy, seznamy, citace,
@@ -52,9 +62,8 @@ Testy: `npm test`
 - hromadné akce (publikovat, koncept, přesun do rubriky, koš, obnovení, smazání)
 - filtrování, vyhledávání, řazení, stránkování
 - hlasování nahoru/dolů (Reddit), karma, komentáře
-- **úpravy cizích příspěvků**: každý přihlášený může upravit publikovaný příspěvek kohokoliv.
+- **úpravy cizích příspěvků** smí jen administrátor; u příspěvku je vidět, kdo ho naposledy upravil.
   Každá změna se ukládá do **historie revizí** (kdo, kdy, popis změny) a libovolnou verzi lze obnovit.
-  Stav (koncept/publikováno) a mazání zůstávají vyhrazeny autorovi a administrátorovi.
 
 **Stránky** – vytvoření, úprava, smazání, vlastní adresa (slug), koncept, zobrazení v navigaci,
 pořadí, historie revizí s obnovou.

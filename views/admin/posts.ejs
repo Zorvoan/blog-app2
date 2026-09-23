@@ -3,10 +3,10 @@
   <div class="head-actions"><a class="btn btn-sm btn-primary" href="/admin/posts/new"><%- icon('plus') %> Nový příspěvek</a></div>
 </div>
 <nav class="tabs tabs-line">
-  <a href="/admin/posts" class="<%= !f.trash && f.status === 'all' && !f.mine ? 'active' : '' %>">Vše</a>
+  <% if (user.role === 'admin') { %><a href="/admin/posts" class="<%= !f.trash && f.status === 'all' && !f.mine ? 'active' : '' %>">Vše</a><% } %>
   <a href="/admin/posts?status=published" class="<%= !f.trash && f.status === 'published' ? 'active' : '' %>">Publikované (<%= counts.published || 0 %>)</a>
   <a href="/admin/posts?status=draft" class="<%= !f.trash && f.status === 'draft' ? 'active' : '' %>">Koncepty</a>
-  <a href="/admin/posts?mine=1" class="<%= !f.trash && f.mine && f.status === 'all' ? 'active' : '' %>">Moje</a>
+  <a href="/admin/posts?mine=1" class="<%= !f.trash && f.mine && f.status === 'all' ? 'active' : '' %>"><%= user.role === 'admin' ? 'Moje' : 'Všechny moje' %></a>
   <a href="/admin/posts?trash=1" class="<%= f.trash ? 'active' : '' %>">Koš</a>
 </nav>
 <div class="pad">

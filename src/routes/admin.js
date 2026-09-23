@@ -8,6 +8,8 @@ const perms = require('../permissions');
 
 const router = express.Router();
 router.use(requireLogin);
+// Stránky, rubriky, štítky a uživatele spravuje pouze administrátor.
+router.use(['/pages', '/categories', '/tags', '/users'], requireAdmin);
 
 const denied = (res, message = 'K této akci nemáte oprávnění.') =>
   res.status(403).render('error', { title: 'Přístup odepřen', message });
@@ -17,18 +19,19 @@ const idsFrom = (v) => [].concat(v ?? []).map((x) => int(x)).filter((x) => x > 0
 // ---------------------------------------------------------------- přehled
 router.get('/', (req, res) => {
   const { models } = req.app.locals;
+  const admin = perms.isAdmin(req.user);
   const mine = models.posts.list({ viewer: req.user, authorId: req.user.id, status: 'all', sort: 'updated', limit: 5 });
   res.render('admin/dashboard', {
-    title: 'Administrace', wide: true,
+    title: 'Administrace', wide: true, admin,
     counts: {
-      ...models.posts.counts(),
+      ...models.posts.counts(admin ? null : req.user.id),
       pages: models.pages.count(),
       categories: res.locals.allCategories.length,
       comments: models.comments.count(),
       users: models.users.count(),
     },
     mine: mine.items,
-    activity: models.revisions.recent(12),
+    activity: models.revisions.recent(12, admin ? null : req.user.id),
   });
 });
 
@@ -37,6 +40,7 @@ router.get('/', (req, res) => {
 router.post('/preview', (req, res) => {
   const { models } = req.app.locals;
   if (req.body.type === 'page') {
+    if (!perms.isAdmin(req.user)) return denied(res);
     const { data } = readPage(req.body, models, int(req.body.id));
     const page = { ...data, id: int(req.body.id) || null, updated_at: new Date().toISOString(), username: req.user.username, display_name: req.user.display_name };
     return res.render('page', { title: `Náhled: ${data.title || 'bez názvu'}`, page, preview: 'unsaved' });
@@ -69,7 +73,8 @@ router.get('/posts', (req, res) => {
     q: str(req.query.q, 200).trim(),
     status: ['published', 'draft'].includes(req.query.status) ? req.query.status : 'all',
     category: req.query.category === 'none' ? 'none' : int(req.query.category) || '',
-    mine: req.query.mine === '1',
+    // Běžný uživatel vidí ve správě jen své příspěvky.
+    mine: req.query.mine === '1' || !perms.isAdmin(req.user),
     trash: req.query.trash === '1',
     sort: ['updated', 'new', 'top', 'title'].includes(req.query.sort) ? req.query.sort : 'updated',
   };
@@ -82,7 +87,7 @@ router.get('/posts', (req, res) => {
   });
   res.render('admin/posts', {
     title: 'Příspěvky', wide: true, posts: items, total, f, page,
-    totalPages: Math.max(1, Math.ceil(total / perPage)), counts: models.posts.counts(),
+    totalPages: Math.max(1, Math.ceil(total / perPage)), counts: models.posts.counts(perms.isAdmin(req.user) ? null : req.user.id),
   });
 });
 
@@ -130,8 +135,6 @@ router.post('/posts/:id', loadPost, (req, res) => {
   if (!perms.canEditPost(req.user, post)) return denied(res, 'Tento příspěvek nemůžete upravovat.');
   const { data, errors } = readPost(req.body, models);
   if (!perms.canPinPost(req.user)) data.pinned = !!post.pinned;
-  // Stav konceptu/publikace smí měnit jen autor nebo admin – ostatní upravují pouze obsah.
-  if (!perms.canDeletePost(req.user, post)) data.status = post.status;
   if (errors.length) return renderPostForm(res, { post, form: { ...req.body, pinned: data.pinned }, errors, statusCode: 422 });
   models.posts.update(post.id, data, req.user.id);
   sessions.flash(req, 'success', post.author_id === req.user.id ? 'Změny byly uloženy.' : `Upravili jste příspěvek uživatele @${post.username ?? 'smazaný'}.`);

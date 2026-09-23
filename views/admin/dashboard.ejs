@@ -2,7 +2,7 @@
 <div class="col-head sticky"><h1>Přehled</h1>
   <div class="head-actions">
     <a class="btn btn-sm btn-primary" href="/admin/posts/new"><%- icon('plus') %> Příspěvek</a>
-    <a class="btn btn-sm" href="/admin/pages/new"><%- icon('plus') %> Stránka</a>
+    <% if (admin) { %><a class="btn btn-sm" href="/admin/pages/new"><%- icon('plus') %> Stránka</a><% } %>
   </div>
 </div>
 <div class="pad">
@@ -10,10 +10,12 @@
     <a class="stat" href="/admin/posts?status=published"><strong><%= counts.published || 0 %></strong><span>Publikováno</span></a>
     <a class="stat" href="/admin/posts?status=draft"><strong><%= counts.drafts || 0 %></strong><span>Koncepty</span></a>
     <a class="stat" href="/admin/posts?trash=1"><strong><%= counts.trashed || 0 %></strong><span>V koši</span></a>
-    <a class="stat" href="/admin/pages"><strong><%= counts.pages %></strong><span>Stránky</span></a>
-    <a class="stat" href="/admin/categories"><strong><%= counts.categories %></strong><span>Rubriky</span></a>
-    <div class="stat"><strong><%= counts.comments %></strong><span>Komentáře</span></div>
-    <div class="stat"><strong><%= counts.users %></strong><span>Uživatelé</span></div>
+    <% if (admin) { %>
+      <a class="stat" href="/admin/pages"><strong><%= counts.pages %></strong><span>Stránky</span></a>
+      <a class="stat" href="/admin/categories"><strong><%= counts.categories %></strong><span>Rubriky</span></a>
+      <div class="stat"><strong><%= counts.comments %></strong><span>Komentáře</span></div>
+      <a class="stat" href="/admin/users"><strong><%= counts.users %></strong><span>Uživatelé</span></a>
+    <% } %>
   </div>
 
   <div class="two-col">
@@ -31,7 +33,8 @@
       </ul>
     </section>
     <section class="card">
-      <h3>Poslední aktivita</h3>
+      <h3><%= admin ? 'Poslední aktivita' : 'Změny mých příspěvků' %></h3>
+      <% if (!activity.length) { %><p class="muted">Zatím žádné změny.</p><% } %>
       <ul class="plain-list activity">
         <% activity.forEach(a => { const href = a.entity === 'post' ? '/admin/posts/' + a.entity_id + '/history' : '/admin/pages/' + a.entity_id + '/history'; %>
           <li>

@@ -15,7 +15,7 @@
           <li><a href="/c/<%= c.slug %>"><span class="dot" style="--c:<%= c.color %>"></span><span>r/<%= c.name %></span><small><%= c.post_count %></small></a></li>
         <% }) %>
       </ul>
-      <% if (user) { %><a class="card-more" href="/admin/categories">Spravovat rubriky</a><% } %>
+      <% if (perms.canEditCategory(user)) { %><a class="card-more" href="/admin/categories">Spravovat rubriky</a><% } %>
     </section>
     <% if (trendingTags.length) { %>
     <section class="card">

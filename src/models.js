@@ -149,10 +149,12 @@ function createModels(db) {
       FROM revisions r LEFT JOIN users u ON u.id = r.editor_id
       WHERE r.entity = ? AND r.entity_id = ? ORDER BY r.id DESC`).all(entity, entityId),
     byId: (entity, entityId, id) => db.prepare('SELECT * FROM revisions WHERE entity = ? AND entity_id = ? AND id = ?').get(entity, entityId, id),
-    recent: (limit = 10) => db.prepare(`
+    // authorId = jen změny příspěvků daného autora (přehled běžného uživatele).
+    recent: (limit = 10, authorId = null) => db.prepare(`
       SELECT r.id, r.entity, r.entity_id, r.title, r.note, r.created_at, u.username editor_username, u.display_name editor_name
       FROM revisions r LEFT JOIN users u ON u.id = r.editor_id
-      ORDER BY r.id DESC LIMIT ?`).all(limit),
+      WHERE ? IS NULL OR (r.entity = 'post' AND r.entity_id IN (SELECT id FROM posts WHERE author_id = ?))
+      ORDER BY r.id DESC LIMIT ?`).all(authorId, authorId, limit),
     removeFor: (entity, entityId) => db.prepare('DELETE FROM revisions WHERE entity = ? AND entity_id = ?').run(entity, entityId),
   };
 
@@ -270,12 +272,12 @@ function createModels(db) {
       else db.prepare('INSERT INTO votes (user_id, post_id, value) VALUES (?, ?, ?) ON CONFLICT(user_id, post_id) DO UPDATE SET value = excluded.value')
         .run(userId, postId, value);
     },
-    counts: () => db.prepare(`
+    counts: (authorId = null) => db.prepare(`
       SELECT
         SUM(deleted_at IS NULL AND status = 'published') published,
         SUM(deleted_at IS NULL AND status = 'draft') drafts,
         SUM(deleted_at IS NOT NULL) trashed
-      FROM posts`).get(),
+      FROM posts WHERE ? IS NULL OR author_id = ?`).get(authorId, authorId),
   };
 
   // ---------- komentáře ----------

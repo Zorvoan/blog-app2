@@ -18,7 +18,7 @@
         <% if (c.description) { %><p><%= c.description %></p><% } %>
         <small class="muted"><%= total %> příspěvků</small>
       </div>
-      <% if (user) { %><a class="btn btn-sm" href="/admin/categories/<%= c.id %>/edit">Upravit rubriku</a><% } %>
+      <% if (perms.canEditCategory(user)) { %><a class="btn btn-sm" href="/admin/categories/<%= c.id %>/edit">Upravit rubriku</a><% } %>
     </div>
   </section>
 <% } else if (header && header.kind === 'user') { const p = header.profile; %>

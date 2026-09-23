@@ -114,7 +114,11 @@ test('rubriky: vytvoření, úprava', async () => {
   catId = Number(r.text.match(/\/admin\/categories\/(\d+)\/edit/)[1]);
   r = await alice.post('/admin/categories', { name: 'technika' });
   assert.equal(r.status, 422, 'duplicitní název');
-  r = await bob.post(`/admin/categories/${catId}`, { name: 'Technika a věda', color: '#00ff00' });
+  r = await bob.post(`/admin/categories/${catId}`, { name: 'Hack', color: '#00ff00' });
+  assert.equal(r.status, 403, 'běžný uživatel nespravuje rubriky');
+  r = await bob.get('/admin/categories');
+  assert.equal(r.status, 403);
+  r = await alice.post(`/admin/categories/${catId}`, { name: 'Technika a věda', color: '#00ff00' });
   assert.equal(r.status, 303);
   r = await anon.get('/c/technika-a-veda');
   assert.equal(r.status, 200);
@@ -140,19 +144,49 @@ test('příspěvky: vytvoření jako text, štítky, zobrazení', async () => {
   assert.match(r.text, /Ahoj &lt;světe&gt;/);
 });
 
-test('příspěvky: jiný uživatel může upravit cizí příspěvek, vzniká revize', async () => {
+test('příspěvky: běžný uživatel nesmí upravit cizí příspěvek', async () => {
   let r = await bob.get(`/admin/posts/${postId}/edit`);
-  assert.equal(r.status, 200);
-  assert.match(r.text, /Upravujete příspěvek uživatele/);
-  r = await bob.post(`/admin/posts/${postId}`, { title: 'Upraveno Bobem', body: 'Nový text', category_id: catId, status: 'draft', note: 'oprava' });
+  assert.equal(r.status, 403);
+  r = await bob.post(`/admin/posts/${postId}`, { title: 'Upraveno Bobem', body: 'Nový text', status: 'published' });
+  assert.equal(r.status, 403);
+  r = await bob.get(`/admin/posts/${postId}/history`);
+  assert.equal(r.status, 404);
+  r = await anon.get(`/p/${postId}`);
+  assert.doesNotMatch(r.text, /Upraveno Bobem/);
+  r = await bob.get(`/p/${postId}`);
+  assert.doesNotMatch(r.text, new RegExp(`/admin/posts/${postId}/edit`), 'bez odkazu Upravit');
+  r = await bob.get('/admin/posts');
+  assert.doesNotMatch(r.text, /Ahoj &lt;světe&gt;/, 've správě vidí jen své příspěvky');
+  r = await bob.get('/admin/tags');
+  assert.equal(r.status, 403, 'štítky spravuje jen admin');
+  r = await bob.get('/');
+  assert.doesNotMatch(r.text, /href="\/admin\/(pages|categories|tags|users)"/, 'odkazy na správu jsou skryté');
+  r = await alice.get('/');
+  assert.match(r.text, /href="\/admin\/categories"/);
+});
+
+test('příspěvky: autor upravuje svůj příspěvek, vzniká revize', async () => {
+  let r = await alice.post(`/admin/posts/${postId}`, { title: 'Upravený titulek', body: 'Nový text', category_id: catId, status: 'published', note: 'oprava' });
   assert.equal(r.status, 303);
   r = await anon.get(`/p/${postId}`);
-  assert.equal(r.status, 200, 'stav nemůže změnit ne-autor – zůstává publikováno');
-  assert.match(r.text, /Upraveno Bobem/);
-  assert.match(r.text, /Naposledy upravil\(a\) <a href="\/u\/bob">/);
+  assert.match(r.text, /Upravený titulek/);
   r = await alice.get(`/admin/posts/${postId}/history`);
   assert.match(r.text, /2 revizí/);
   assert.match(r.text, /oprava/);
+});
+
+test('příspěvky: administrátor smí upravit cizí příspěvek', async () => {
+  let r = await bob.post('/admin/posts', { title: 'Bobův příspěvek', body: 'text', status: 'published' });
+  const id = Number(r.location.match(/\/p\/(\d+)/)[1]);
+  r = await bob.get(`/admin/posts/${id}/edit`);
+  assert.equal(r.status, 200, 'vlastní příspěvek upravit smí');
+  r = await alice.get(`/admin/posts/${id}/edit`);
+  assert.equal(r.status, 200);
+  assert.match(r.text, /Jako administrátor upravujete příspěvek uživatele/);
+  r = await alice.post(`/admin/posts/${id}`, { title: 'Moderováno', body: 'text', status: 'published' });
+  assert.equal(r.status, 303);
+  r = await anon.get(`/p/${id}`);
+  assert.match(r.text, /Naposledy upravil\(a\) <a href="\/u\/alice">/);
 });
 
 test('příspěvky: obnovení revize', async () => {
@@ -229,14 +263,20 @@ test('stránky: CRUD, slug, navigace, historie', async () => {
   assert.match(r.text, /href="\/pages\/kontakt-cr"/);
   r = await alice.get('/admin/pages');
   const id = r.text.match(/\/admin\/pages\/(\d+)\/edit/)[1];
-  r = await bob.post(`/admin/pages/${id}`, { title: 'Kontakt', slug: 'kontakt', body: 'Nový obsah', status: 'draft' });
+  r = await bob.post(`/admin/pages/${id}`, { title: 'Hack', slug: 'hack', body: 'x', status: 'published' });
+  assert.equal(r.status, 403, 'běžný uživatel nespravuje stránky');
+  r = await bob.get(`/admin/pages/${id}/history`);
+  assert.equal(r.status, 403);
+  r = await alice.post(`/admin/pages/${id}`, { title: 'Kontakt', slug: 'kontakt', body: 'Nový obsah', status: 'draft' });
   assert.equal(r.status, 303);
   r = await anon.get('/pages/kontakt');
   assert.equal(r.status, 404, 'koncept není veřejný');
-  r = await bob.get(`/admin/pages/${id}/history`);
+  r = await bob.get('/pages/kontakt');
+  assert.equal(r.status, 404, 'koncept stránky nevidí ani přihlášený uživatel');
+  r = await alice.get(`/admin/pages/${id}/history`);
   assert.match(r.text, /2 revizí/);
   r = await bob.post(`/admin/pages/${id}/delete`);
-  assert.equal(r.status, 403, 'mazat smí autor/admin');
+  assert.equal(r.status, 403);
   r = await alice.post(`/admin/pages/${id}/delete`);
   assert.equal(r.status, 303);
 });
