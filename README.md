@@ -17,7 +17,7 @@ Potřebujete Node.js **18.18 nebo novější** (verzi zjistíte příkazem `node
 ```bash
 npm install
 npm run seed     # nepovinné: ukázková data (admin / admin12345, jana / jana12345)
-npm start        # http://127.0.0.1:3000
+npm start        # http://127.0.0.1:4000
 ```
 
 Pokud začnete bez ukázkových dat, **první registrovaný uživatel se stane administrátorem**.
@@ -26,7 +26,7 @@ Proměnné prostředí:
 
 | Proměnná        | Výchozí hodnota   | Popis                                            |
 |-----------------|-------------------|--------------------------------------------------|
-| `PORT`          | `3000`            | port serveru                                     |
+| `PORT`          | `4000`            | port serveru                                     |
 | `HOST`          | `127.0.0.1`       | adresa, na které server naslouchá                |
 | `DB_FILE`       | `data/blog.db`    | cesta k souboru SQLite databáze                  |
 | `COOKIE_SECURE` | –                 | `1` = cookie jen přes HTTPS (za reverzní proxy)  |
