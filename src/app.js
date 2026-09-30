@@ -8,6 +8,7 @@ const { createSessions, csrfProtection } = require('./auth');
 const fmt = require('./format');
 const perms = require('./permissions');
 const { icon } = require('./icons');
+const { idempotency, newKey } = require('./idempotency');
 
 const ROOT = path.join(__dirname, '..');
 
@@ -16,6 +17,7 @@ function createApp({ dbFile = process.env.DB_FILE || path.join(ROOT, 'data', 'bl
   const models = createModels(db);
   const sessions = createSessions(models);
   sessions.purgeExpired();
+  models.idempotency.purgeOlderThan(30);
 
   const app = express();
   app.set('view engine', 'ejs');
@@ -23,7 +25,7 @@ function createApp({ dbFile = process.env.DB_FILE || path.join(ROOT, 'data', 'bl
   app.disable('x-powered-by');
   app.locals.models = models;
   app.locals.sessions = sessions;
-  Object.assign(app.locals, fmt, { perms, icon });
+  Object.assign(app.locals, fmt, { perms, icon, newKey });
 
   // Vše se servíruje lokálně – žádné CDN ani externí zdroje.
   app.use((req, res, next) => {
@@ -66,6 +68,7 @@ function createApp({ dbFile = process.env.DB_FILE || path.join(ROOT, 'data', 'bl
     next();
   });
   app.use(csrfProtection);
+  app.use(idempotency);
 
   app.use(require('./routes/auth'));
   app.use(require('./routes/settings'));

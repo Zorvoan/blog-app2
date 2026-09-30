@@ -1,5 +1,5 @@
 <form method="post" action="<%= action %>" class="form" data-offline-queue="Rubrika">
-  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <%- include('../partials/form-keys') %>
   <label>Název<input name="name" value="<%= form.name %>" required maxlength="60"></label>
   <label>Adresa (slug)<input name="slug" value="<%= form.slug %>" maxlength="80" placeholder="vygeneruje se z názvu"></label>
   <label>Popis<textarea name="description" rows="2" maxlength="500"><%= form.description %></textarea></label>

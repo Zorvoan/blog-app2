@@ -18,6 +18,12 @@
   // České skloňování: 1 položka, 2–4 položky, 5+ položek.
   const items = (n) => `${n} ${n === 1 ? 'položka' : n >= 2 && n <= 4 ? 'položky' : 'položek'}`;
 
+  // Jednorázový klíč formuláře. Stránka může pocházet z offline mezipaměti, proto se klíč
+  // generuje znovu při každém zobrazení – každé odeslání je tak nové, dvojklik ne.
+  const newKey = () => (crypto.randomUUID ? crypto.randomUUID()
+    : [...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, '0')).join(''));
+  $$('input[data-idem]').forEach((input) => { input.value = newKey(); });
+
   const csrfOf = (form) => form.querySelector('input[name="_csrf"]')?.value || '';
 
   // ------------------------------------------------------------ service worker + offline

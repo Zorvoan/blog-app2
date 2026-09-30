@@ -1,0 +1,3 @@
+<%# Skrytá pole formulářů, které lze odeslat i offline: CSRF token + jednorázový klíč proti dvojímu zpracování. %>
+<input type="hidden" name="_csrf" value="<%= csrf %>">
+<input type="hidden" name="_idem" value="<%= newKey() %>" data-idem>

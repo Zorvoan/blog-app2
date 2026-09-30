@@ -1,7 +1,7 @@
 <%# Pole pro psaní (nový příspěvek z hlavní stránky / komentář). Parametry: action, queueLabel, placeholder,
     textLabel, maxlength, submitLabel; u příspěvku navíc kind: 'post' (titulek, rubrika, publikace). %>
 <form class="composer media<%= locals.kind === 'post' ? '' : ' compact' %>" method="post" action="<%= action %>" data-offline-queue="<%= queueLabel %>">
-  <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <%- include('form-keys') %>
   <%- include('avatar', { name: user.username, display: user.display_name }) %>
   <div class="composer-main">
     <% if (locals.kind === 'post') { %><input class="composer-title" name="title" placeholder="Titulek" required maxlength="300" aria-label="Titulek"><% } %>

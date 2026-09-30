@@ -342,7 +342,17 @@ function createModels(db) {
     count: () => db.prepare('SELECT COUNT(*) n FROM pages').get().n,
   };
 
-  return { db, getSettings, saveSettings, users, categories, tags, revisions, posts, comments, pages };
+  // ---------- zpracované formuláře (viz src/idempotency.js) ----------
+  const idempotency = {
+    find: (userId, key) => db.prepare('SELECT location FROM idempotency_keys WHERE user_id = ? AND key = ?').get(userId, key),
+    save: (userId, key, location) => db.prepare(
+      'INSERT OR IGNORE INTO idempotency_keys (user_id, key, location, created_at) VALUES (?, ?, ?, ?)'
+    ).run(userId, key, location, now()),
+    purgeOlderThan: (days) => db.prepare('DELETE FROM idempotency_keys WHERE created_at < ?')
+      .run(new Date(Date.now() - days * 864e5).toISOString()),
+  };
+
+  return { db, getSettings, saveSettings, users, categories, tags, revisions, posts, comments, pages, idempotency };
 }
 
 module.exports = { createModels, DEFAULT_SETTINGS };

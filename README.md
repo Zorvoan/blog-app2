@@ -85,6 +85,19 @@ pořadí, historie revizí s obnovou.
   a po obnovení spojení se **automaticky odešlou**
 - aplikaci lze nainstalovat jako PWA
 
+## Databáze a migrace
+
+Data jsou v jednom souboru SQLite (`data/blog.db`). Záloha = zkopírování souboru při vypnutém serveru.
+
+Struktura databáze se mění pomocí **migrací** v `src/db.js` (pole `MIGRATIONS`). Při startu aplikace
+se automaticky spustí migrace, které databáze ještě nemá (verze je uložena v `PRAGMA user_version`),
+každá v transakci. Existující migrace se nikdy nemění – změna schématu = nová položka na konci pole.
+Databáze vytvořené před zavedením migrací se povýší automaticky a data zůstanou zachována.
+
+Formuláře, které lze odeslat offline, nesou jednorázový klíč (`_idem`). Server si pamatuje už
+zpracované klíče (`src/idempotency.js`), takže dvojklik ani opakované odeslání offline fronty
+nevytvoří duplicitní příspěvek či komentář.
+
 ## Struktura
 
 ```

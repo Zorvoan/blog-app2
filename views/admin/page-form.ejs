@@ -7,7 +7,7 @@
 <div class="pad">
   <%- include('../partials/errors') %>
   <form method="post" action="<%= editing ? '/admin/pages/' + page.id : '/admin/pages' %>" class="form editor-layout" data-offline-queue="<%= editing ? 'Úprava stránky' : 'Nová stránka' %>">
-    <input type="hidden" name="_csrf" value="<%= csrf %>">
+    <%- include('../partials/form-keys') %>
     <% if (editing) { %><input type="hidden" name="id" value="<%= page.id %>"><% } %>
     <div class="editor-main">
       <label>Název<input name="title" value="<%= form.title %>" required maxlength="300" class="input-lg" autofocus></label>

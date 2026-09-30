@@ -260,6 +260,35 @@ test('hromadné akce', async () => {
   assert.match(r.text, /Hromadný B/);
 });
 
+test('opakované odeslání stejného formuláře (dvojklik, offline fronta) nevytvoří duplicitu', async () => {
+  const key = 'test-klic-0000-0001';
+  const first = await alice.post('/admin/posts', { title: 'Jen jednou', body: 'x', status: 'published', _idem: key });
+  const second = await alice.post('/admin/posts', { title: 'Jen jednou', body: 'x', status: 'published', _idem: key });
+  assert.equal(first.status, 303);
+  assert.equal(second.status, 303);
+  assert.equal(second.location, first.location, 'opakování vrátí výsledek prvního odeslání');
+  let r = await alice.get('/admin/posts?q=Jen+jednou');
+  assert.equal((r.text.match(/<strong>Jen jednou<\/strong>/g) || []).length, 1, 'příspěvek existuje jen jednou');
+
+  // Jiný klíč = nový příspěvek; stejný klíč jiného uživatele se nepoužije.
+  await alice.post('/admin/posts', { title: 'Jen jednou', body: 'x', status: 'published', _idem: 'test-klic-0000-0002' });
+  r = await alice.get('/admin/posts?q=Jen+jednou');
+  assert.equal((r.text.match(/<strong>Jen jednou<\/strong>/g) || []).length, 2);
+  r = await bob.post('/admin/posts', { title: 'Bobův se stejným klíčem', body: 'x', status: 'published', _idem: key });
+  assert.notEqual(r.location, first.location);
+
+  // Komentář odeslaný dvakrát se uloží jednou.
+  const postUrl = first.location;
+  for (let i = 0; i < 2; i++) await bob.post(`${postUrl}/comments`, { body: 'Dvojklik', _idem: 'test-klic-0000-0003' });
+  r = await anon.get(postUrl);
+  assert.equal((r.text.match(/Dvojklik/g) || []).length, 1);
+});
+
+test('formuláře nesou jednorázový klíč', async () => {
+  const r = await alice.get('/admin/posts/new');
+  assert.match(r.text, /name="_idem" value="[0-9a-f-]{36}"/);
+});
+
 test('náhled neuloženého příspěvku a stránky (SSR)', async () => {
   let r = await alice.post('/admin/posts/preview', { title: 'Náhledový titulek', body: '# Nadpis\n- bod', category_id: catId });
   assert.equal(r.status, 200);

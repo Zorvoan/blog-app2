@@ -43,7 +43,9 @@ function loadDriver() {
 
 let driver;
 
-const SCHEMA = `
+// Migrace 1: výchozí schéma. Používá IF NOT EXISTS, takže databáze vytvořené
+// před zavedením migrací (user_version = 0) projdou beze změny a jen se označí verzí.
+const BASE_SCHEMA = `
 CREATE TABLE IF NOT EXISTS users (
   id            INTEGER PRIMARY KEY,
   username      TEXT NOT NULL UNIQUE COLLATE NOCASE,
@@ -152,13 +154,44 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 `;
 
+// Seznam migrací. Každá se spustí právě jednou, v pořadí, uvnitř transakce.
+// Číslo verze = pořadí v poli (1, 2, …) a ukládá se do PRAGMA user_version.
+// Existující migrace se NIKDY nemění – změna schématu = nová položka na konci.
+const MIGRATIONS = [
+  BASE_SCHEMA,
+
+  // 2: rychlý součet hlasů pro příspěvek (primární klíč začíná user_id, proto nestačí).
+  'CREATE INDEX IF NOT EXISTS idx_votes_post ON votes (post_id);',
+
+  // 3: ochrana proti dvojímu zpracování stejného formuláře (dvojklik, opakované odeslání offline fronty).
+  `CREATE TABLE IF NOT EXISTS idempotency_keys (
+     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+     key        TEXT NOT NULL,
+     location   TEXT NOT NULL,
+     created_at TEXT NOT NULL,
+     PRIMARY KEY (user_id, key)
+   );`,
+];
+
+function migrate(db) {
+  const current = db.prepare('PRAGMA user_version').get().user_version;
+  if (current > MIGRATIONS.length) {
+    throw new Error(`Databáze má verzi ${current}, ale aplikace zná jen ${MIGRATIONS.length}. Použijte novější verzi aplikace.`);
+  }
+  for (let version = current + 1; version <= MIGRATIONS.length; version++) {
+    db.tx(() => {
+      db.exec(MIGRATIONS[version - 1]);
+      db.exec(`PRAGMA user_version = ${version}`);
+    });
+  }
+}
+
 function openDb(file) {
   if (file !== ':memory:') fs.mkdirSync(path.dirname(file), { recursive: true });
   driver ??= loadDriver();
   const db = driver.open(file);
   db.driverName = driver.name;
   db.exec('PRAGMA journal_mode = WAL; PRAGMA foreign_keys = ON; PRAGMA busy_timeout = 5000;');
-  db.exec(SCHEMA);
 
   db.tx = (fn) => {
     db.exec('BEGIN');
@@ -171,9 +204,15 @@ function openDb(file) {
       throw err;
     }
   };
+  try {
+    migrate(db);
+  } catch (err) {
+    db.close();
+    throw err;
+  }
   return db;
 }
 
 const now = () => new Date().toISOString();
 
-module.exports = { openDb, now };
+module.exports = { openDb, now, SCHEMA_VERSION: MIGRATIONS.length };
