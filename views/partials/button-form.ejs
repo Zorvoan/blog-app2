@@ -1,6 +1,8 @@
 <%# Formulář s jedním tlačítkem (smazat, obnovit, …). Parametry: action, btnClass, ic (ikona),
-    text (viditelný popis), label (popis pro čtečky u ikonových tlačítek), confirm, formClass. %>
+    text (viditelný popis), label (popis pro čtečky u ikonových tlačítek), confirm, formClass,
+    back (kam se vrátit po akci). %>
 <form method="post" action="<%= action %>"<% if (locals.confirm) { %> data-confirm="<%= confirm %>"<% } %><% if (locals.formClass) { %> class="<%= formClass %>"<% } %>>
   <input type="hidden" name="_csrf" value="<%= csrf %>">
+  <% if (locals.back) { %><input type="hidden" name="back" value="<%= back %>"><% } %>
   <button class="<%= btnClass %>"<% if (locals.label) { %> title="<%= label %>" aria-label="<%= label %>"<% } %>><%- icon(ic) %><% if (locals.text) { %> <%= text %><% } %></button>
 </form>

@@ -1,7 +1,7 @@
 <%- include('../partials/top') %>
 <% const editing = !!post; %>
 <%- include('../partials/edit-head', {
-  back: '/admin/posts', heading: editing ? 'Upravit příspěvek' : 'Nový příspěvek',
+  back: backUrl, heading: editing ? 'Upravit příspěvek' : 'Nový příspěvek',
   viewHref: editing && '/p/' + post.id, historyHref: editing && '/admin/posts/' + post.id + '/history',
 }) %>
 <div class="pad">
@@ -33,7 +33,7 @@
     </aside>
   </form>
   <% if (editing && perms.canDeletePost(user, post)) { %>
-    <%- include('../partials/button-form', { action: '/admin/posts/' + post.id + '/trash', confirm: 'Přesunout příspěvek do koše?', formClass: 'danger-row', btnClass: 'btn btn-danger btn-sm', ic: 'trash', text: 'Přesunout do koše' }) %>
+    <%- include('../partials/button-form', { action: '/admin/posts/' + post.id + '/trash', confirm: 'Přesunout příspěvek do koše?', formClass: 'danger-row', btnClass: 'btn btn-danger btn-sm', ic: 'trash', text: 'Přesunout do koše', back: backUrl }) %>
   <% } %>
 </div>
 <%- include('../partials/bottom') %>

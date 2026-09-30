@@ -3,6 +3,7 @@
 // Společné pomůcky administrace – aby se v jednotlivých routách neopakovaly.
 
 const { int } = require('../../forms');
+const { backTarget, localPath, withBack, renamePath } = require('../../navigation');
 
 function denied(res, message = 'K této akci nemáte oprávnění.') {
   return res.status(403).render('error', { title: 'Přístup odepřen', message });
@@ -31,7 +32,22 @@ function allow(check, message) {
 
 const idsFrom = (v) => [].concat(v ?? []).map((x) => int(x)).filter((x) => x > 0);
 
-// Po uložení: "Uložit a pokračovat" zůstane v editoru, jinak zobrazí výsledek.
-const afterSave = (req, editUrl, viewUrl) => (req.body.after === 'edit' ? editUrl : viewUrl);
+// Middleware: zjistí, kam vede šipka zpět (stránka, odkud uživatel přišel), a uloží to
+// do res.locals.backUrl. Šablona ho předá dál skrytým polem "back", takže po uložení
+// formuláře (POST) je cíl návratu známý. fallback/avoid mohou být funkce (req) => …
+function rememberBack(fallback, avoid = () => []) {
+  return (req, res, next) => {
+    const defaultUrl = typeof fallback === 'function' ? fallback(req) : fallback;
+    res.locals.backUrl = req.method === 'GET'
+      ? backTarget(req, defaultUrl, { avoid: avoid(req) })
+      : localPath(req.body.back) || defaultUrl;
+    next();
+  };
+}
 
-module.exports = { denied, done, load, allow, idsFrom, afterSave };
+// Po uložení: "Uložit a pokračovat" zůstane v editoru (a zachová cíl návratu),
+// jinak se uživatel vrátí tam, odkud do editoru přišel.
+const afterSave = (req, res, editUrl) =>
+  (req.body.after === 'edit' ? withBack(editUrl, res.locals.backUrl) : res.locals.backUrl);
+
+module.exports = { denied, done, load, allow, idsFrom, rememberBack, afterSave, backTarget, withBack, localPath, renamePath };

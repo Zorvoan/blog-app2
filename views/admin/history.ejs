@@ -1,5 +1,5 @@
 <%- include('../partials/top') %>
-<%- include('../partials/edit-head', { back: base + '/' + item.id + '/edit', heading: 'Historie změn', viewHref: entity === 'post' ? '/p/' + item.id : '/pages/' + item.slug }) %>
+<%- include('../partials/edit-head', { back: backUrl, heading: 'Historie změn', viewHref: entity === 'post' ? '/p/' + item.id : '/pages/' + item.slug }) %>
 <div class="pad">
   <p><strong><%= item.title %></strong> · <%= revs.length %> revizí</p>
   <ol class="timeline">
@@ -18,7 +18,7 @@
             <h3><%= r.title %></h3>
             <div class="prose"><%- renderText(r.body) %></div>
             <% if (i > 0) { %>
-              <%- include('../partials/button-form', { action: base + '/' + item.id + '/revisions/' + r.id + '/restore', confirm: 'Obnovit tuto verzi? Aktuální obsah zůstane v historii.', btnClass: 'btn btn-sm', ic: 'history', text: 'Obnovit tuto verzi' }) %>
+              <%- include('../partials/button-form', { action: base + '/' + item.id + '/revisions/' + r.id + '/restore', confirm: 'Obnovit tuto verzi? Aktuální obsah zůstane v historii.', btnClass: 'btn btn-sm', ic: 'history', text: 'Obnovit tuto verzi', back: backUrl }) %>
             <% } %>
           </div>
         </details>

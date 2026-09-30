@@ -1,6 +1,6 @@
 <%- include('partials/top') %>
 <div class="col-head sticky">
-  <a class="plain-btn icon-btn" href="<%= post.cat_slug ? '/c/' + post.cat_slug : '/' %>" aria-label="Zpět" data-back><%- icon('back') %></a>
+  <a class="plain-btn icon-btn" href="<%= locals.backUrl || '/' %>" aria-label="Zpět"><%- icon('back') %></a>
   <h1>Příspěvek</h1>
 </div>
 <%- include('partials/preview-banner') %>

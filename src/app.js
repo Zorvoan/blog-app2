@@ -9,6 +9,7 @@ const fmt = require('./format');
 const perms = require('./permissions');
 const { icon } = require('./icons');
 const { idempotency, newKey } = require('./idempotency');
+const { withBack } = require('./navigation');
 
 const ROOT = path.join(__dirname, '..');
 
@@ -25,7 +26,7 @@ function createApp({ dbFile = process.env.DB_FILE || path.join(ROOT, 'data', 'bl
   app.disable('x-powered-by');
   app.locals.models = models;
   app.locals.sessions = sessions;
-  Object.assign(app.locals, fmt, { perms, icon, newKey, appVersion: require('../package.json').version });
+  Object.assign(app.locals, fmt, { perms, icon, newKey, withBack, appVersion: require('../package.json').version });
 
   // Vše se servíruje lokálně – žádné CDN ani externí zdroje.
   app.use((req, res, next) => {

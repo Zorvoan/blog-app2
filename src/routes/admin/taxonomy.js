@@ -5,7 +5,7 @@
 const express = require('express');
 const { readCategory, int } = require('../../forms');
 const { parseTags } = require('../../format');
-const { done, load } = require('./helpers');
+const { done, load, rememberBack, backTarget, renamePath } = require('./helpers');
 
 // ---------------------------------------------------------------- rubriky
 const categories = express.Router();
@@ -28,14 +28,17 @@ categories.post('/', (req, res) => {
   done(req, res, CAT_BASE, `Rubrika „${data.name}“ byla vytvořena.`);
 });
 
-categories.get('/:id/edit', loadCategory, (req, res) => renderEdit(res, req.cat));
+const backToList = rememberBack(CAT_BASE, (req) => [`${CAT_BASE}/${req.params.id}`]);
 
-categories.post('/:id', loadCategory, (req, res) => {
+categories.get('/:id/edit', loadCategory, backToList, (req, res) => renderEdit(res, req.cat));
+
+categories.post('/:id', loadCategory, backToList, (req, res) => {
   const { models } = req.app.locals;
   const { data, errors } = readCategory(req.body, models, req.cat.id);
   if (errors.length) return renderEdit(res, req.cat, req.body, errors, 422);
   models.categories.update(req.cat.id, data);
-  done(req, res, CAT_BASE, 'Rubrika byla uložena.');
+  // Návrat tam, odkud uživatel přišel; při změně adresy rubriky na její novou adresu.
+  done(req, res, renamePath(res.locals.backUrl, `/c/${req.cat.slug}`, `/c/${data.slug}`), 'Rubrika byla uložena.');
 });
 
 categories.post('/:id/delete', loadCategory, (req, res) => {
@@ -45,7 +48,8 @@ categories.post('/:id/delete', loadCategory, (req, res) => {
     return done(req, res, `${CAT_BASE}/${req.cat.id}/edit`, 'Neplatná cílová rubrika.', 'error');
   }
   models.categories.remove(req.cat.id, moveTo);
-  done(req, res, CAT_BASE, `Rubrika „${req.cat.name}“ byla smazána.`);
+  done(req, res, backTarget(req, CAT_BASE, { avoid: [`/c/${req.cat.slug}`, `${CAT_BASE}/${req.cat.id}`] }),
+    `Rubrika „${req.cat.name}“ byla smazána.`);
 });
 
 // ---------------------------------------------------------------- štítky

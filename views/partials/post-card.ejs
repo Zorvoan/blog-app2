@@ -54,7 +54,7 @@
         <a href="/admin/posts/<%= post.id %>/history" class="plain-btn act" title="Historie změn"><%- icon('history') %><span class="hide-sm">Historie</span></a>
       <% } %>
       <% if (full && perms.canDeletePost(user, post) && !post.deleted_at) { %>
-        <%- include('button-form', { action: '/admin/posts/' + post.id + '/trash', confirm: 'Přesunout příspěvek do koše?', btnClass: 'plain-btn act act-danger', ic: 'trash', text: 'Smazat' }) %>
+        <%- include('button-form', { action: '/admin/posts/' + post.id + '/trash', confirm: 'Přesunout příspěvek do koše?', btnClass: 'plain-btn act act-danger', ic: 'trash', text: 'Smazat', back: locals.backUrl }) %>
       <% } %>
     </footer>
     <% } %>

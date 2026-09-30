@@ -3,6 +3,7 @@
 const express = require('express');
 const { hashPassword, verifyPassword } = require('../auth');
 const { str } = require('../forms');
+const { localPath } = require('../navigation');
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ function recordFailure(key) {
   if (failures.size > 10000) failures.delete(failures.keys().next().value);
 }
 
-const safeNext = (n) => (typeof n === 'string' && /^\/(?![/\\])/.test(n) ? n : '/');
+const safeNext = (n) => localPath(n) || '/';
 
 router.get('/login', (req, res) => {
   if (req.user) return res.redirect(303, '/');

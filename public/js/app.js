@@ -189,11 +189,4 @@
     $$('input[name="ids"]', all.closest('form')).forEach((c) => { c.checked = all.checked; });
   }));
 
-  // ------------------------------------------------------------ zpět
-  $$('[data-back]').forEach((a) => a.addEventListener('click', (e) => {
-    if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) {
-      e.preventDefault();
-      history.back();
-    }
-  }));
 })();

@@ -1,7 +1,7 @@
 <%- include('../partials/top') %>
 <% const editing = !!page; %>
 <%- include('../partials/edit-head', {
-  back: '/admin/pages', heading: editing ? 'Upravit stránku' : 'Nová stránka',
+  back: backUrl, heading: editing ? 'Upravit stránku' : 'Nová stránka',
   viewHref: editing && '/pages/' + page.slug, historyHref: editing && '/admin/pages/' + page.id + '/history',
 }) %>
 <div class="pad">
@@ -23,7 +23,7 @@
     </aside>
   </form>
   <% if (editing && perms.canDeletePage(user, page)) { %>
-    <%- include('../partials/button-form', { action: '/admin/pages/' + page.id + '/delete', confirm: 'Smazat stránku včetně historie?', formClass: 'danger-row', btnClass: 'btn btn-danger btn-sm', ic: 'trash', text: 'Smazat stránku' }) %>
+    <%- include('../partials/button-form', { action: '/admin/pages/' + page.id + '/delete', confirm: 'Smazat stránku včetně historie?', formClass: 'danger-row', btnClass: 'btn btn-danger btn-sm', ic: 'trash', text: 'Smazat stránku', back: backUrl }) %>
   <% } %>
 </div>
 <%- include('../partials/bottom') %>

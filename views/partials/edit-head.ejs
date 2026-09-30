@@ -1,11 +1,14 @@
-<%# Hlavička editačních obrazovek. Parametry: back, heading, viewHref, historyHref (nepovinné). %>
+<%# Hlavička editačních obrazovek. Parametry: back, heading, viewHref, historyHref (nepovinné).
+    Odkazy Zobrazit/Historie nesou adresu tohoto editoru i s jeho cílem návratu, aby šipka zpět
+    na další stránce vedla sem a odsud dál tam, odkud uživatel do editoru přišel. %>
+<% const self = withBack(currentPath, back); %>
 <div class="col-head sticky">
   <a class="plain-btn icon-btn" href="<%= back %>" aria-label="Zpět"><%- icon('back') %></a>
   <h1><%= heading %></h1>
   <% if (locals.viewHref) { %>
     <div class="head-actions">
-      <a class="btn btn-sm" href="<%= viewHref %>"><%- icon('eye') %> Zobrazit</a>
-      <% if (locals.historyHref) { %><a class="btn btn-sm" href="<%= historyHref %>"><%- icon('history') %> Historie</a><% } %>
+      <a class="btn btn-sm" href="<%= withBack(viewHref, self) %>"><%- icon('eye') %> Zobrazit</a>
+      <% if (locals.historyHref) { %><a class="btn btn-sm" href="<%= withBack(historyHref, self) %>"><%- icon('history') %> Historie</a><% } %>
     </div>
   <% } %>
 </div>

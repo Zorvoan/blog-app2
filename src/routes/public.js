@@ -4,6 +4,7 @@ const express = require('express');
 const { requireLogin } = require('../auth');
 const { str, int } = require('../forms');
 const perms = require('../permissions');
+const { backTarget, refererPath } = require('../navigation');
 
 const router = express.Router();
 
@@ -80,17 +81,10 @@ router.get('/p/:id', (req, res, next) => {
   res.render('post', {
     title: post.title, post, comments: models.comments.forPost(post.id),
     preview: post.status === 'draft' || !!post.deleted_at ? 'saved' : null,
+    // Šipka zpět: odkud uživatel na příspěvek přišel (domů, rubrika, profil, …).
+    backUrl: backTarget(req, post.cat_slug ? `/c/${post.cat_slug}` : '/'),
   });
 });
-
-function backTo(req, fallback) {
-  const ref = req.get('referer');
-  try {
-    const u = new URL(ref);
-    if (u.host === req.get('host')) return u.pathname + u.search;
-  } catch { /* neplatný referer */ }
-  return fallback;
-}
 
 // Hlasovat a komentovat lze jen publikované příspěvky, které nejsou v koši.
 function loadPublishedPost(req, res, next) {
@@ -109,7 +103,7 @@ router.post('/p/:id/vote', requireLogin, loadPublishedPost, (req, res) => {
     const p = models.posts.byId(post.id, req.user.id);
     return res.json({ score: p.score, myVote: p.my_vote ?? 0 });
   }
-  res.redirect(303, backTo(req, `/p/${post.id}`) + `#post-${post.id}`);
+  res.redirect(303, `${refererPath(req) || `/p/${post.id}`}#post-${post.id}`);
 });
 
 router.post('/p/:id/comments', requireLogin, loadPublishedPost, (req, res) => {

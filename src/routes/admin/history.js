@@ -4,10 +4,14 @@
 // Přidá na router: GET /:id/history a POST /:id/revisions/:rid/restore.
 
 const { int } = require('../../forms');
-const { done } = require('./helpers');
+const { done, rememberBack, withBack } = require('./helpers');
 
 function addHistoryRoutes(router, { entity, base, loadItem, canEdit, restore }) {
-  const guard = [loadItem, (req, res, next) => (canEdit(req.user, req.item) ? next() : next('route'))];
+  const guard = [
+    loadItem,
+    (req, res, next) => (canEdit(req.user, req.item) ? next() : next('route')),
+    rememberBack((req) => `${base}/${req.item.id}/edit`),
+  ];
 
   router.get('/:id/history', guard, (req, res) => {
     const revs = req.app.locals.models.revisions.list(entity, req.item.id);
@@ -20,7 +24,7 @@ function addHistoryRoutes(router, { entity, base, loadItem, canEdit, restore }) 
     if (!rev) return next('route');
     const note = `Obnovena revize #${rev.id}`;
     restore(models, req.item, rev, note, req.user.id);
-    done(req, res, `${base}/${req.item.id}/history`, `${note}.`);
+    done(req, res, withBack(`${base}/${req.item.id}/history`, res.locals.backUrl), `${note}.`);
   });
 }
 

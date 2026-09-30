@@ -6,7 +6,7 @@ const express = require('express');
 const { readPost, str, int } = require('../../forms');
 const { parseTags } = require('../../format');
 const perms = require('../../permissions');
-const { denied, done, load, allow, idsFrom, afterSave } = require('./helpers');
+const { denied, done, load, allow, idsFrom, rememberBack, afterSave, backTarget } = require('./helpers');
 const { addHistoryRoutes } = require('./history');
 
 const router = express.Router();
@@ -17,6 +17,10 @@ const loadPost = load('item', (models, id, req) => {
   return post && perms.canViewPost(req.user, post) ? post : null;
 });
 const ownerOnly = (verb) => allow((req) => perms.canEditPost(req.user, req.item), `Příspěvek může ${verb} jen jeho autor.`);
+// Adresy konkrétního příspěvku – po jeho smazání se na ně nevracíme.
+const postPaths = (id) => [`/p/${id}`, `${BASE}/${id}`];
+const backToList = rememberBack(BASE);
+const backFromEditor = rememberBack(BASE, (req) => [`${BASE}/${req.params.id}`]);
 
 function renderForm(res, { post = null, form, errors = [], statusCode = 200 }) {
   res.status(statusCode).render('admin/post-form', {
@@ -96,22 +100,23 @@ router.post('/bulk', (req, res) => {
 });
 
 // ---------------------------------------------------------------- vytvoření
-router.get('/new', (req, res) => {
+router.get('/new', backToList, (req, res) => {
   renderForm(res, { form: { title: '', body: '', category_id: int(req.query.category) || '', status: 'published', tags: '', pinned: false } });
 });
 
-router.post('/', (req, res) => {
+router.post('/', backToList, (req, res) => {
   const { models } = req.app.locals;
   const { data, errors } = readPost(req.body, models);
   if (!perms.canPinPost(req.user)) data.pinned = false;
   if (errors.length) return renderForm(res, { form: { ...req.body, pinned: data.pinned }, errors, statusCode: 422 });
   const id = models.posts.create(data, req.user.id);
-  done(req, res, afterSave(req, `${BASE}/${id}/edit`, `/p/${id}`),
-    data.status === 'draft' ? 'Koncept byl uložen.' : 'Příspěvek byl publikován.');
+  // Nový příspěvek se po uložení zobrazí (pokud autor nechce pokračovat v editaci).
+  const target = req.body.after === 'edit' ? afterSave(req, res, `${BASE}/${id}/edit`) : `/p/${id}`;
+  done(req, res, target, data.status === 'draft' ? 'Koncept byl uložen.' : 'Příspěvek byl publikován.');
 });
 
 // ---------------------------------------------------------------- úprava a mazání (jen autor)
-router.get('/:id/edit', loadPost, ownerOnly('upravit'), (req, res) => {
+router.get('/:id/edit', loadPost, ownerOnly('upravit'), backFromEditor, (req, res) => {
   const post = req.item;
   renderForm(res, {
     post,
@@ -119,19 +124,21 @@ router.get('/:id/edit', loadPost, ownerOnly('upravit'), (req, res) => {
   });
 });
 
-router.post('/:id', loadPost, ownerOnly('upravit'), (req, res) => {
+router.post('/:id', loadPost, ownerOnly('upravit'), backFromEditor, (req, res) => {
   const { models } = req.app.locals;
   const post = req.item;
   const { data, errors } = readPost(req.body, models);
   if (!perms.canPinPost(req.user)) data.pinned = !!post.pinned;
   if (errors.length) return renderForm(res, { post, form: { ...req.body, pinned: data.pinned }, errors, statusCode: 422 });
   models.posts.update(post.id, data, req.user.id);
-  done(req, res, afterSave(req, `${BASE}/${post.id}/edit`, `/p/${post.id}`), 'Změny byly uloženy.');
+  const target = afterSave(req, res, `${BASE}/${post.id}/edit`);
+  // Návrat do výpisu (domů, rubrika, …) odscrolluje na upravený příspěvek.
+  done(req, res, target.startsWith(BASE) || target.startsWith('/p/') ? target : `${target}#post-${post.id}`, 'Změny byly uloženy.');
 });
 
 router.post('/:id/trash', loadPost, ownerOnly('smazat'), (req, res) => {
   req.app.locals.models.posts.trash([req.item.id]);
-  done(req, res, BASE, 'Příspěvek byl přesunut do koše.');
+  done(req, res, backTarget(req, BASE, { avoid: postPaths(req.item.id) }), 'Příspěvek byl přesunut do koše.');
 });
 
 router.post('/:id/restore', loadPost, ownerOnly('obnovit'), (req, res) => {

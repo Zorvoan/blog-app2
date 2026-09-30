@@ -1,5 +1,5 @@
 <%- include('../partials/top') %>
-<%- include('../partials/edit-head', { back: '/admin/categories', heading: 'Upravit rubriku', viewHref: '/c/' + cat.slug }) %>
+<%- include('../partials/edit-head', { back: backUrl, heading: 'Upravit rubriku', viewHref: '/c/' + cat.slug }) %>
 <div class="pad narrow">
   <%- include('../partials/errors') %>
   <%- include('category-fields', { action: '/admin/categories/' + cat.id, submit: 'Uložit rubriku' }) %>
@@ -8,6 +8,7 @@
       <h3>Smazat rubriku</h3>
       <form method="post" action="/admin/categories/<%= cat.id %>/delete" class="form" data-confirm="Smazat rubriku r/<%= cat.name %>?">
         <input type="hidden" name="_csrf" value="<%= csrf %>">
+        <input type="hidden" name="back" value="<%= backUrl %>">
         <label>Příspěvky přesunout do
           <select name="move_to">
             <option value="">Bez rubriky</option>
