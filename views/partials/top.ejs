@@ -12,10 +12,10 @@
   <script src="/js/app.js" defer></script>
 </head>
 <body class="<%= bare ? 'bare' : '' %>" data-user="<%= user ? user.username : '' %>">
-<div id="net-banner" class="net-banner" role="status" hidden>
+<div id="net-banner" class="floating-bar net-banner" role="status" hidden>
   <%- icon('offline') %><span data-net-text>Jste offline – zobrazujete uloženou verzi. Nové příspěvky se odešlou po připojení.</span>
 </div>
-<div id="outbox-banner" class="outbox-banner" role="status" hidden>
+<div id="outbox-banner" class="floating-bar outbox-banner" role="status" hidden>
   <%- icon('sync') %><span data-outbox-text></span>
   <button type="button" class="btn btn-sm" data-outbox-sync>Odeslat nyní</button>
 </div>
@@ -25,18 +25,18 @@
 <div class="shell<%= wide ? ' wide' : '' %>">
   <header class="sidenav">
     <a class="brand" href="/" title="<%= settings.site_name %>">
-      <img src="/icon.svg" alt="" width="32" height="32"><span><%= settings.site_name %></span>
+      <img src="/icon.svg" alt="" width="32" height="32"><span class="wide-only"><%= settings.site_name %></span>
     </a>
     <nav class="nav" aria-label="Hlavní navigace">
       <% const navLink = (href, ic, label, active) => { %>
-        <a href="<%= href %>" class="<%= active ? 'active' : '' %>"<%- active ? ' aria-current="page"' : '' %>><%- icon(ic) %><span><%= label %></span></a>
+        <a href="<%= href %>" class="<%= active ? 'active' : '' %>"<%- active ? ' aria-current="page"' : '' %>><%- icon(ic) %><span class="wide-only"><%= label %></span></a>
       <% } %>
       <% navLink('/', 'home', 'Domů', currentPath === '/') %>
       <% navLink('/categories', 'grid', 'Rubriky', currentPath === '/categories' || currentPath.startsWith('/c/')) %>
       <% navLink('/search', 'search', 'Hledat', currentPath === '/search') %>
       <% if (user) { %>
         <% navLink('/u/' + user.username, 'user', 'Profil', currentPath === '/u/' + user.username) %>
-        <div class="nav-sep">Správa</div>
+        <div class="nav-sep wide-only">Správa</div>
         <% navLink('/admin', 'dashboard', 'Přehled', currentPath === '/admin' || currentPath === '/admin/') %>
         <% navLink('/admin/posts', 'post', 'Příspěvky', currentPath.startsWith('/admin/posts')) %>
         <% if (user.role === 'admin') { %>
@@ -49,21 +49,21 @@
       <% } %>
     </nav>
     <% if (user) { %>
-      <a class="btn btn-primary btn-compose" href="/admin/posts/new"><%- icon('feather') %><span>Napsat</span></a>
+      <a class="btn btn-primary btn-compose" href="/admin/posts/new" aria-label="Napsat"><%- icon('feather', 'narrow-only') %><span class="wide-only">Napsat</span></a>
       <div class="me">
         <a class="me-link" href="/u/<%= user.username %>">
           <span class="avatar" style="--av:<%= avatarColor(user.username) %>"><%= initial(user.display_name) %></span>
-          <span class="me-names"><strong><%= user.display_name %></strong><small>@<%= user.username %><%= user.role === 'admin' ? ' · admin' : '' %></small></span>
+          <span class="me-names wide-only"><strong><%= user.display_name %></strong><small class="muted">@<%= user.username %><%= user.role === 'admin' ? ' · admin' : '' %></small></span>
         </a>
-        <form method="post" action="/logout" data-logout>
+        <form method="post" action="/logout" class="wide-only" data-logout>
           <input type="hidden" name="_csrf" value="<%= csrf %>">
           <button class="icon-btn" title="Odhlásit se" aria-label="Odhlásit se"><%- icon('logout') %></button>
         </form>
       </div>
     <% } else { %>
       <div class="guest">
-        <a class="btn btn-primary" href="/login?next=<%= encodeURIComponent(currentPath) %>">Přihlásit se</a>
-        <a class="btn" href="/register">Registrovat</a>
+        <a class="btn btn-primary" href="/login?next=<%= encodeURIComponent(currentPath) %>" aria-label="Přihlásit se"><%- icon('login', 'narrow-only') %><span class="wide-only">Přihlásit se</span></a>
+        <a class="btn wide-only" href="/register">Registrovat</a>
       </div>
     <% } %>
   </header>

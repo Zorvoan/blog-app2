@@ -22,13 +22,13 @@
       <h3>Trendy</h3>
       <ul class="trend-list">
         <% trendingTags.forEach(t => { %>
-          <li><a href="/t/<%= encodeURIComponent(t.name) %>"><strong>#<%= t.name %></strong><small><%= t.n %> příspěvků</small></a></li>
+          <li><a href="/t/<%= encodeURIComponent(t.name) %>"><strong>#<%= t.name %></strong><small class="muted"><%= t.n %> příspěvků</small></a></li>
         <% }) %>
       </ul>
     </section>
     <% } %>
     <footer class="site-foot">
-      <% navPages.forEach(p => { %><a href="/pages/<%= p.slug %>"><%= p.title %></a><% }) %>
+      <% navPages.forEach(p => { %><a class="muted" href="/pages/<%= p.slug %>"><%= p.title %></a><% }) %>
       <span>© <%= new Date().getFullYear() %> <%= settings.site_name %></span>
     </footer>
   </aside>

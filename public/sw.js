@@ -6,10 +6,10 @@
  */
 'use strict';
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const STATIC_CACHE = `static-${VERSION}`;
 const PAGE_CACHE = 'pages';
-const STATIC_FILES = ['/css/style.css', '/js/app.js', '/icon.svg', '/manifest.webmanifest'];
+const STATIC_FILES = ['/css/style.css', '/js/app.js', '/icons.svg', '/icon.svg', '/manifest.webmanifest'];
 const QUEUEABLE = /^\/(admin\/(posts|pages|categories)(\/\d+)?|p\/\d+\/comments)$/;
 
 // ---------------------------------------------------------------- IndexedDB fronta

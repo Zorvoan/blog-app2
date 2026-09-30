@@ -11,7 +11,7 @@
       <li>
         <details<%= i === 0 ? ' open' : '' %>>
           <summary>
-            <%- include('../partials/avatar', { name: r.editor_username, display: r.editor_name }) %>
+            <%- include('../partials/avatar', { name: r.editor_username, display: r.editor_name, size: 'sm' }) %>
             <span>
               <strong>#<%= r.id %></strong> · <%= r.note || 'Upraveno' %>
               <span class="muted">– <%= r.editor_username ? '@' + r.editor_username : 'smazaný uživatel' %>, <%= formatDate(r.created_at) %></span>

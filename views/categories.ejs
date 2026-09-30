@@ -5,8 +5,8 @@
   <% allCategories.forEach(c => { %>
     <a class="cat-tile" href="/c/<%= c.slug %>" style="--c:<%= c.color %>">
       <span class="cat-icon">r/</span>
-      <span><strong>r/<%= c.name %></strong><small><%= c.description || 'Bez popisu' %></small></span>
-      <span class="count"><%= c.post_count %></span>
+      <span class="cat-tile-text"><strong>r/<%= c.name %></strong><small class="muted"><%= c.description || 'Bez popisu' %></small></span>
+      <span class="cat-tile-count"><%= c.post_count %></span>
     </a>
   <% }) %>
 </div>

@@ -59,7 +59,7 @@
     <table class="table">
       <thead><tr>
         <th class="w-check"><input type="checkbox" data-check-all aria-label="Vybrat vše"></th>
-        <th>Titulek</th><th>Autor</th><th>Rubrika</th><th>Stav</th><th class="num">Skóre</th><th>Upraveno</th><th></th>
+        <th>Titulek</th><th class="opt">Autor</th><th>Rubrika</th><th>Stav</th><th class="num">Skóre</th><th>Upraveno</th><th></th>
       </tr></thead>
       <tbody>
       <% if (!posts.length) { %><tr><td colspan="8" class="muted center">Žádné příspěvky.</td></tr><% } %>
@@ -69,9 +69,9 @@
           <td class="title-cell">
             <a href="<%= f.trash ? '/p/' + p.id : '/admin/posts/' + p.id + '/edit' %>"><strong><%= p.title %></strong></a>
             <% if (p.pinned) { %><span class="badge badge-pin">Připnuto</span><% } %>
-            <% if (p.tags.length) { %><div class="tags small"><% p.tags.forEach(t => { %><span>#<%= t %></span><% }) %></div><% } %>
+            <% if (p.tags.length) { %><div class="tags small"><% p.tags.forEach(t => { %><span class="tag">#<%= t %></span><% }) %></div><% } %>
           </td>
-          <td><%= p.username ? '@' + p.username : '—' %></td>
+          <td class="opt"><%= p.username ? '@' + p.username : '—' %></td>
           <td><% if (p.cat_name) { %><span class="chip" style="--c:<%= p.cat_color %>">r/<%= p.cat_name %></span><% } else { %><span class="muted">—</span><% } %></td>
           <td><span class="badge <%= p.status === 'draft' ? 'badge-draft' : 'badge-ok' %>"><%= p.status === 'draft' ? 'Koncept' : 'Publikováno' %></span></td>
           <td class="num"><%= p.score %></td>

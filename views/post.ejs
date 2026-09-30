@@ -14,7 +14,7 @@
       <input type="hidden" name="_csrf" value="<%= csrf %>">
       <%- include('partials/avatar', { name: user.username, display: user.display_name }) %>
       <div class="composer-main">
-        <textarea name="body" rows="2" placeholder="Napište odpověď…" required maxlength="5000" aria-label="Komentář" data-autogrow></textarea>
+        <textarea class="composer-text" name="body" rows="2" placeholder="Napište odpověď…" required maxlength="5000" aria-label="Komentář" data-autogrow></textarea>
         <div class="composer-bar"><span></span><button class="btn btn-primary">Odpovědět</button></div>
       </div>
     </form>

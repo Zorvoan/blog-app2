@@ -38,7 +38,7 @@
       <ul class="plain-list activity">
         <% activity.forEach(a => { const href = a.entity === 'post' ? '/admin/posts/' + a.entity_id + '/history' : '/admin/pages/' + a.entity_id + '/history'; %>
           <li>
-            <%- include('../partials/avatar', { name: a.editor_username, display: a.editor_name }) %>
+            <%- include('../partials/avatar', { name: a.editor_username, display: a.editor_name, size: 'sm' }) %>
             <span><strong><%= a.editor_username ? '@' + a.editor_username : 'smazaný' %></strong>
             <%= a.note.toLowerCase() %> <%= a.entity === 'post' ? 'příspěvek' : 'stránku' %>
             <a href="<%= href %>"><%= a.title %></a>

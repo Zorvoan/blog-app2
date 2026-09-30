@@ -50,7 +50,7 @@
     <%- include('partials/avatar', { name: user.username, display: user.display_name }) %>
     <div class="composer-main">
       <input class="composer-title" name="title" placeholder="Titulek" required maxlength="300" aria-label="Titulek">
-      <textarea name="body" rows="2" placeholder="Co se děje? Použijte #štítky a @zmínky…" maxlength="50000" aria-label="Text příspěvku" data-autogrow></textarea>
+      <textarea class="composer-text" name="body" rows="2" placeholder="Co se děje? Použijte #štítky a @zmínky…" maxlength="50000" aria-label="Text příspěvku" data-autogrow></textarea>
       <div class="composer-bar">
         <select name="category_id" aria-label="Rubrika">
           <option value="">Bez rubriky</option>

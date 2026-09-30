@@ -95,18 +95,25 @@
     form.addEventListener('submit', async (e) => {
       if (!navigator.onLine) return;
       e.preventDefault();
+      const body = new URLSearchParams(new FormData(form));
+      body.set('value', e.submitter?.value || '1');
       try {
         const res = await fetch(form.action, {
-          method: 'POST', body: new URLSearchParams(new FormData(form)),
+          method: 'POST', body,
           headers: { Accept: 'application/json' }, credentials: 'same-origin',
         });
         if (!res.ok || !res.headers.get('content-type')?.includes('json')) throw new Error();
         const { score, myVote } = await res.json();
-        const box = form.closest('.vote');
-        $('[data-score]', box).textContent = score;
-        $('.vote-btn.up', box).classList.toggle('on', myVote === 1);
-        $('.vote-btn.down', box).classList.toggle('on', myVote === -1);
+        $('[data-score]', form).textContent = score;
+        for (const btn of $$('.vote-btn', form)) {
+          const on = Number(btn.value) === myVote;
+          btn.classList.toggle('on', on);
+          btn.setAttribute('aria-pressed', String(on));
+        }
       } catch {
+        // Záloha: klasické odeslání formuláře (form.submit() nepřenáší hodnotu tlačítka).
+        const input = Object.assign(document.createElement('input'), { type: 'hidden', name: 'value', value: body.get('value') });
+        form.append(input);
         form.submit();
       }
     });
