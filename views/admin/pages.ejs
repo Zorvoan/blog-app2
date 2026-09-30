@@ -5,11 +5,7 @@
 <div class="pad">
   <form class="filters" method="get">
     <input type="search" name="q" value="<%= f.q %>" placeholder="Hledat stránky…" aria-label="Hledat">
-    <select name="status" aria-label="Stav">
-      <option value="all">Všechny stavy</option>
-      <option value="published"<%= f.status === 'published' ? ' selected' : '' %>>Publikováno</option>
-      <option value="draft"<%= f.status === 'draft' ? ' selected' : '' %>>Koncept</option>
-    </select>
+    <%- include('../partials/status-select', { current: f.status, withAll: true }) %>
     <button class="btn btn-sm">Filtrovat</button>
   </form>
   <div class="table-wrap">
@@ -26,14 +22,11 @@
         <td class="num"><%= p.sort_order %></td>
         <td><small><%= timeAgo(p.updated_at) %><% if (p.editor_username) { %> · @<%= p.editor_username %><% } %></small></td>
         <td class="row-actions">
-          <a class="icon-btn sm" href="/pages/<%= p.slug %>" title="Zobrazit"><%- icon('eye') %></a>
-          <a class="icon-btn sm" href="/admin/pages/<%= p.id %>/edit" title="Upravit"><%- icon('edit') %></a>
-          <a class="icon-btn sm" href="/admin/pages/<%= p.id %>/history" title="Historie"><%- icon('history') %></a>
+          <a class="plain-btn icon-btn sm" href="/pages/<%= p.slug %>" title="Zobrazit"><%- icon('eye') %></a>
+          <a class="plain-btn icon-btn sm" href="/admin/pages/<%= p.id %>/edit" title="Upravit"><%- icon('edit') %></a>
+          <a class="plain-btn icon-btn sm" href="/admin/pages/<%= p.id %>/history" title="Historie"><%- icon('history') %></a>
           <% if (perms.canDeletePage(user, p)) { %>
-            <form method="post" action="/admin/pages/<%= p.id %>/delete" data-confirm="Smazat stránku „<%= p.title %>“?">
-              <input type="hidden" name="_csrf" value="<%= csrf %>">
-              <button class="icon-btn sm danger" title="Smazat" aria-label="Smazat"><%- icon('trash') %></button>
-            </form>
+            <%- include('../partials/button-form', { action: '/admin/pages/' + p.id + '/delete', confirm: 'Smazat stránku „' + p.title + '“?', btnClass: 'plain-btn icon-btn sm danger', ic: 'trash', label: 'Smazat' }) %>
           <% } %>
         </td>
       </tr>

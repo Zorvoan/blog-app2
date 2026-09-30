@@ -19,10 +19,7 @@
           </form>
         </td>
         <td class="row-actions">
-          <form method="post" action="/admin/tags/<%= t.id %>/delete" data-confirm="Odstranit štítek #<%= t.name %> ze všech příspěvků?">
-            <input type="hidden" name="_csrf" value="<%= csrf %>">
-            <button class="icon-btn sm danger" title="Smazat" aria-label="Smazat"><%- icon('trash') %></button>
-          </form>
+          <%- include('../partials/button-form', { action: '/admin/tags/' + t.id + '/delete', confirm: 'Odstranit štítek #' + t.name + ' ze všech příspěvků?', btnClass: 'plain-btn icon-btn sm danger', ic: 'trash', label: 'Smazat' }) %>
         </td>
       </tr>
     <% }) %>

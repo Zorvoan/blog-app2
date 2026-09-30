@@ -1,20 +1,13 @@
 <%- include('../partials/top') %>
 <% const editing = !!page; %>
-<div class="col-head sticky">
-  <a class="icon-btn" href="/admin/pages" aria-label="Zpět"><%- icon('back') %></a>
-  <h1><%= editing ? 'Upravit stránku' : 'Nová stránka' %></h1>
-  <% if (editing) { %>
-    <div class="head-actions">
-      <a class="btn btn-sm" href="/pages/<%= page.slug %>"><%- icon('eye') %> Zobrazit</a>
-      <a class="btn btn-sm" href="/admin/pages/<%= page.id %>/history"><%- icon('history') %> Historie</a>
-    </div>
-  <% } %>
-</div>
+<%- include('../partials/edit-head', {
+  back: '/admin/pages', heading: editing ? 'Upravit stránku' : 'Nová stránka',
+  viewHref: editing && '/pages/' + page.slug, historyHref: editing && '/admin/pages/' + page.id + '/history',
+}) %>
 <div class="pad">
   <%- include('../partials/errors') %>
   <form method="post" action="<%= editing ? '/admin/pages/' + page.id : '/admin/pages' %>" class="form editor-layout" data-offline-queue="<%= editing ? 'Úprava stránky' : 'Nová stránka' %>">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
-    <input type="hidden" name="type" value="page">
     <% if (editing) { %><input type="hidden" name="id" value="<%= page.id %>"><% } %>
     <div class="editor-main">
       <label>Název<input name="title" value="<%= form.title %>" required maxlength="300" class="input-lg" autofocus></label>
@@ -23,29 +16,14 @@
     </div>
     <aside class="editor-side card">
       <label>Adresa (slug)<input name="slug" value="<%= form.slug %>" maxlength="100" placeholder="vygeneruje se z názvu"><small>/pages/<%= form.slug || '…' %></small></label>
-      <label>Stav
-        <select name="status">
-          <option value="published"<%= form.status === 'published' ? ' selected' : '' %>>Publikováno</option>
-          <option value="draft"<%= form.status === 'draft' ? ' selected' : '' %>>Koncept</option>
-        </select>
-      </label>
+      <label>Stav<%- include('../partials/status-select', { current: form.status }) %></label>
       <label class="check"><input type="checkbox" name="show_in_nav" value="1"<%= form.show_in_nav === '1' ? ' checked' : '' %>> Zobrazit v patičce/navigaci</label>
       <label>Pořadí<input type="number" name="sort_order" value="<%= form.sort_order %>"></label>
-      <% if (editing) { %>
-        <label>Popis změny <span class="muted">(nepovinné)</span><input name="note" maxlength="200"></label>
-      <% } %>
-      <div class="btn-col">
-        <button class="btn btn-primary btn-block"><%= editing ? 'Uložit' : 'Vytvořit stránku' %></button>
-        <button class="btn btn-block" name="after" value="edit">Uložit a pokračovat</button>
-        <button class="btn btn-block" formaction="/admin/preview" formtarget="_blank" formnovalidate data-no-queue><%- icon('eye') %> Náhled</button>
-      </div>
+      <%- include('../partials/edit-actions', { editing, submitLabel: editing ? 'Uložit' : 'Vytvořit stránku', previewAction: '/admin/pages/preview' }) %>
     </aside>
   </form>
   <% if (editing && perms.canDeletePage(user, page)) { %>
-    <form method="post" action="/admin/pages/<%= page.id %>/delete" data-confirm="Smazat stránku včetně historie?" class="danger-row">
-      <input type="hidden" name="_csrf" value="<%= csrf %>">
-      <button class="btn btn-danger btn-sm"><%- icon('trash') %> Smazat stránku</button>
-    </form>
+    <%- include('../partials/button-form', { action: '/admin/pages/' + page.id + '/delete', confirm: 'Smazat stránku včetně historie?', formClass: 'danger-row', btnClass: 'btn btn-danger btn-sm', ic: 'trash', text: 'Smazat stránku' }) %>
   <% } %>
 </div>
 <%- include('../partials/bottom') %>

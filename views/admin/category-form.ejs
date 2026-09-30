@@ -1,9 +1,5 @@
 <%- include('../partials/top') %>
-<div class="col-head sticky">
-  <a class="icon-btn" href="/admin/categories" aria-label="Zpět"><%- icon('back') %></a>
-  <h1>Upravit rubriku</h1>
-  <div class="head-actions"><a class="btn btn-sm" href="/c/<%= cat.slug %>"><%- icon('eye') %> Zobrazit</a></div>
-</div>
+<%- include('../partials/edit-head', { back: '/admin/categories', heading: 'Upravit rubriku', viewHref: '/c/' + cat.slug }) %>
 <div class="pad narrow">
   <%- include('../partials/errors') %>
   <%- include('category-fields', { action: '/admin/categories/' + cat.id, submit: 'Uložit rubriku' }) %>

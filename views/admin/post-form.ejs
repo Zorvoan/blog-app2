@@ -1,20 +1,13 @@
 <%- include('../partials/top') %>
 <% const editing = !!post; %>
-<div class="col-head sticky">
-  <a class="icon-btn" href="/admin/posts" aria-label="Zpět"><%- icon('back') %></a>
-  <h1><%= editing ? 'Upravit příspěvek' : 'Nový příspěvek' %></h1>
-  <% if (editing) { %>
-    <div class="head-actions">
-      <a class="btn btn-sm" href="/p/<%= post.id %>"><%- icon('eye') %> Zobrazit</a>
-      <a class="btn btn-sm" href="/admin/posts/<%= post.id %>/history"><%- icon('history') %> Historie</a>
-    </div>
-  <% } %>
-</div>
+<%- include('../partials/edit-head', {
+  back: '/admin/posts', heading: editing ? 'Upravit příspěvek' : 'Nový příspěvek',
+  viewHref: editing && '/p/' + post.id, historyHref: editing && '/admin/posts/' + post.id + '/history',
+}) %>
 <div class="pad">
   <%- include('../partials/errors') %>
   <form method="post" action="<%= editing ? '/admin/posts/' + post.id : '/admin/posts' %>" class="form editor-layout" data-offline-queue="<%= editing ? 'Úprava příspěvku' : 'Nový příspěvek' %>">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
-    <input type="hidden" name="type" value="post">
     <% if (editing) { %><input type="hidden" name="id" value="<%= post.id %>"><% } %>
     <div class="editor-main">
       <label>Titulek<input name="title" value="<%= form.title %>" required maxlength="300" class="input-lg" autofocus></label>
@@ -22,12 +15,7 @@
       <%- include('../partials/editor', { value: form.body }) %>
     </div>
     <aside class="editor-side card">
-      <label>Stav
-        <select name="status">
-          <option value="published"<%= form.status === 'published' ? ' selected' : '' %>>Publikováno</option>
-          <option value="draft"<%= form.status === 'draft' ? ' selected' : '' %>>Koncept</option>
-        </select>
-      </label>
+      <label>Stav<%- include('../partials/status-select', { current: form.status }) %></label>
       <label>Rubrika
         <select name="category_id">
           <option value="">Bez rubriky</option>
@@ -38,24 +26,14 @@
       <% if (perms.canPinPost(user)) { %>
         <label class="check"><input type="checkbox" name="pinned" value="1"<%= form.pinned ? ' checked' : '' %>> Připnout nahoru</label>
       <% } %>
-      <% if (editing) { %>
-        <label>Popis změny <span class="muted">(nepovinné)</span><input name="note" maxlength="200" placeholder="např. oprava překlepů"></label>
-      <% } %>
-      <div class="btn-col">
-        <button class="btn btn-primary btn-block"><%= editing ? 'Uložit' : 'Uložit a zobrazit' %></button>
-        <button class="btn btn-block" name="after" value="edit">Uložit a pokračovat</button>
-        <button class="btn btn-block" formaction="/admin/preview" formtarget="_blank" formnovalidate data-no-queue><%- icon('eye') %> Náhled</button>
-      </div>
+      <%- include('../partials/edit-actions', { editing, submitLabel: editing ? 'Uložit' : 'Uložit a zobrazit', previewAction: '/admin/posts/preview' }) %>
       <% if (editing) { %>
         <p class="muted small">Vytvořeno <%= formatDate(post.created_at) %><% if (post.username) { %> uživatelem @<%= post.username %><% } %>.<br>Naposledy upraveno <%= formatDate(post.updated_at) %>.</p>
       <% } %>
     </aside>
   </form>
   <% if (editing && perms.canDeletePost(user, post)) { %>
-    <form method="post" action="/admin/posts/<%= post.id %>/trash" data-confirm="Přesunout příspěvek do koše?" class="danger-row">
-      <input type="hidden" name="_csrf" value="<%= csrf %>">
-      <button class="btn btn-danger btn-sm"><%- icon('trash') %> Přesunout do koše</button>
-    </form>
+    <%- include('../partials/button-form', { action: '/admin/posts/' + post.id + '/trash', confirm: 'Přesunout příspěvek do koše?', formClass: 'danger-row', btnClass: 'btn btn-danger btn-sm', ic: 'trash', text: 'Přesunout do koše' }) %>
   <% } %>
 </div>
 <%- include('../partials/bottom') %>

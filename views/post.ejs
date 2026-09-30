@@ -1,6 +1,6 @@
 <%- include('partials/top') %>
 <div class="col-head sticky">
-  <a class="icon-btn" href="<%= post.cat_slug ? '/c/' + post.cat_slug : '/' %>" aria-label="Zpět" data-back><%- icon('back') %></a>
+  <a class="plain-btn icon-btn" href="<%= post.cat_slug ? '/c/' + post.cat_slug : '/' %>" aria-label="Zpět" data-back><%- icon('back') %></a>
   <h1>Příspěvek</h1>
 </div>
 <%- include('partials/preview-banner') %>
@@ -10,19 +10,12 @@
 <section class="comments" id="comments">
   <h2 class="section-title">Komentáře (<%= comments.length %>)</h2>
   <% if (user && post.status === 'published' && !post.deleted_at) { %>
-    <form class="composer compact" method="post" action="/p/<%= post.id %>/comments" data-offline-queue="Komentář">
-      <input type="hidden" name="_csrf" value="<%= csrf %>">
-      <%- include('partials/avatar', { name: user.username, display: user.display_name }) %>
-      <div class="composer-main">
-        <textarea class="composer-text" name="body" rows="2" placeholder="Napište odpověď…" required maxlength="5000" aria-label="Komentář" data-autogrow></textarea>
-        <div class="composer-bar"><span></span><button class="btn btn-primary">Odpovědět</button></div>
-      </div>
-    </form>
+    <%- include('partials/composer', { action: '/p/' + post.id + '/comments', queueLabel: 'Komentář', placeholder: 'Napište odpověď…', textLabel: 'Komentář', maxlength: 5000, submitLabel: 'Odpovědět' }) %>
   <% } else if (!user) { %>
     <p class="pad muted"><a href="/login?next=/p/<%= post.id %>">Přihlaste se</a> a zapojte se do diskuze.</p>
   <% } %>
   <% comments.forEach(c => { %>
-    <article class="comment" id="comment-<%= c.id %>">
+    <article class="media comment" id="comment-<%= c.id %>">
       <%- include('partials/avatar', { name: c.username, display: c.display_name }) %>
       <div class="comment-main">
         <header class="post-meta">
@@ -31,10 +24,7 @@
             <span class="sep">·</span><time datetime="<%= c.created_at %>" title="<%= formatDate(c.created_at) %>"><%= timeAgo(c.created_at) %></time>
           </div>
           <% if (perms.canDeleteComment(user, c)) { %>
-            <form method="post" action="/comments/<%= c.id %>/delete" data-confirm="Smazat komentář?">
-              <input type="hidden" name="_csrf" value="<%= csrf %>">
-              <button class="icon-btn sm" title="Smazat" aria-label="Smazat komentář"><%- icon('trash') %></button>
-            </form>
+            <%- include('partials/button-form', { action: '/comments/' + c.id + '/delete', confirm: 'Smazat komentář?', btnClass: 'plain-btn icon-btn sm danger', ic: 'trash', label: 'Smazat komentář' }) %>
           <% } %>
         </header>
         <div class="prose"><%- renderText(c.body) %></div>

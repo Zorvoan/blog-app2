@@ -12,7 +12,7 @@
   <section class="banner" style="--c:<%= c.color %>">
     <div class="banner-strip"></div>
     <div class="banner-body">
-      <span class="cat-icon" style="--c:<%= c.color %>">r/</span>
+      <span class="disc cat-icon" style="--c:<%= c.color %>">r/</span>
       <div>
         <h2>r/<%= c.name %></h2>
         <% if (c.description) { %><p><%= c.description %></p><% } %>
@@ -36,7 +36,7 @@
     </div>
   </section>
 <% } else if (header && header.kind === 'tag') { %>
-  <section class="banner slim"><div class="banner-body"><span class="cat-icon">#</span><div><h2>#<%= header.tag %></h2><small class="muted"><%= total %> příspěvků</small></div></div></section>
+  <section class="banner slim"><div class="banner-body"><span class="disc cat-icon">#</span><div><h2>#<%= header.tag %></h2><small class="muted"><%= total %> příspěvků</small></div></div></section>
 <% } else if (header && header.kind === 'search') { %>
   <form class="searchbar" action="/search" method="get">
     <input type="search" name="q" value="<%= header.q %>" aria-label="Hledat"><button class="btn btn-primary">Hledat</button>
@@ -45,22 +45,7 @@
 <% } %>
 
 <% if (showCompose) { %>
-  <form class="composer" method="post" action="/admin/posts" data-offline-queue="Nový příspěvek">
-    <input type="hidden" name="_csrf" value="<%= csrf %>">
-    <%- include('partials/avatar', { name: user.username, display: user.display_name }) %>
-    <div class="composer-main">
-      <input class="composer-title" name="title" placeholder="Titulek" required maxlength="300" aria-label="Titulek">
-      <textarea class="composer-text" name="body" rows="2" placeholder="Co se děje? Použijte #štítky a @zmínky…" maxlength="50000" aria-label="Text příspěvku" data-autogrow></textarea>
-      <div class="composer-bar">
-        <select name="category_id" aria-label="Rubrika">
-          <option value="">Bez rubriky</option>
-          <% allCategories.forEach(c => { %><option value="<%= c.id %>"<%= typeof composeCategory !== 'undefined' && composeCategory === c.id ? ' selected' : '' %>>r/<%= c.name %></option><% }) %>
-        </select>
-        <a class="muted small" href="/admin/posts/new">Rozšířený editor</a>
-        <button class="btn btn-primary" name="status" value="published">Publikovat</button>
-      </div>
-    </div>
-  </form>
+  <%- include('partials/composer', { kind: 'post', action: '/admin/posts', queueLabel: 'Nový příspěvek', placeholder: 'Co se děje? Použijte #štítky a @zmínky…', textLabel: 'Text příspěvku', maxlength: 50000, submitLabel: 'Publikovat' }) %>
 <% } else if (!user && !header) { %>
   <div class="card welcome">
     <h2>Vítejte na <%= settings.site_name %></h2>

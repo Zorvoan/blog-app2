@@ -1,7 +1,7 @@
 <div class="editor" data-editor>
   <div class="editor-tabs" role="tablist">
-    <button type="button" class="active" data-editor-tab="write" role="tab" aria-selected="true">Psát</button>
-    <button type="button" data-editor-tab="preview" role="tab" aria-selected="false">Náhled</button>
+    <button type="button" class="plain-btn active" data-editor-tab="write" role="tab" aria-selected="true">Psát</button>
+    <button type="button" class="plain-btn" data-editor-tab="preview" role="tab" aria-selected="false">Náhled</button>
     <span class="editor-count muted small" data-editor-count></span>
   </div>
   <textarea name="body" id="body" rows="<%= typeof rows !== 'undefined' ? rows : 14 %>" maxlength="<%= typeof max !== 'undefined' ? max : 50000 %>" placeholder="Pište text… (bez souborů – pouze text)" data-autogrow><%= value %></textarea>

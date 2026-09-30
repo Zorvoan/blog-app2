@@ -12,10 +12,10 @@
   <script src="/js/app.js" defer></script>
 </head>
 <body class="<%= bare ? 'bare' : '' %>" data-user="<%= user ? user.username : '' %>">
-<div id="net-banner" class="floating-bar net-banner" role="status" hidden>
+<div id="net-banner" class="floating floating-bar net-banner" role="status" hidden>
   <%- icon('offline') %><span data-net-text>Jste offline – zobrazujete uloženou verzi. Nové příspěvky se odešlou po připojení.</span>
 </div>
-<div id="outbox-banner" class="floating-bar outbox-banner" role="status" hidden>
+<div id="outbox-banner" class="floating floating-bar outbox-banner" role="status" hidden>
   <%- icon('sync') %><span data-outbox-text></span>
   <button type="button" class="btn btn-sm" data-outbox-sync>Odeslat nyní</button>
 </div>
@@ -23,7 +23,7 @@
 <main class="auth-wrap">
 <% } else { %>
 <div class="shell<%= wide ? ' wide' : '' %>">
-  <header class="sidenav">
+  <header class="panel sidenav">
     <a class="brand" href="/" title="<%= settings.site_name %>">
       <img src="/icon.svg" alt="" width="32" height="32"><span class="wide-only"><%= settings.site_name %></span>
     </a>
@@ -52,12 +52,12 @@
       <a class="btn btn-primary btn-compose" href="/admin/posts/new" aria-label="Napsat"><%- icon('feather', 'narrow-only') %><span class="wide-only">Napsat</span></a>
       <div class="me">
         <a class="me-link" href="/u/<%= user.username %>">
-          <span class="avatar" style="--av:<%= avatarColor(user.username) %>"><%= initial(user.display_name) %></span>
+          <span class="disc avatar" style="--av:<%= avatarColor(user.username) %>"><%= initial(user.display_name) %></span>
           <span class="me-names wide-only"><strong><%= user.display_name %></strong><small class="muted">@<%= user.username %><%= user.role === 'admin' ? ' · admin' : '' %></small></span>
         </a>
         <form method="post" action="/logout" class="wide-only" data-logout>
           <input type="hidden" name="_csrf" value="<%= csrf %>">
-          <button class="icon-btn" title="Odhlásit se" aria-label="Odhlásit se"><%- icon('logout') %></button>
+          <button class="plain-btn icon-btn" title="Odhlásit se" aria-label="Odhlásit se"><%- icon('logout') %></button>
         </form>
       </div>
     <% } else { %>

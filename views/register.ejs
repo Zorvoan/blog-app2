@@ -1,7 +1,6 @@
 <%- include('partials/top') %>
 <div class="auth-card">
-  <a class="auth-logo" href="/"><img src="/icon.svg" alt="" width="48" height="48"></a>
-  <h1>Vytvořit účet</h1>
+  <%- include('partials/auth-head', { heading: 'Vytvořit účet' }) %>
   <% if (firstUser) { %><div class="flash flash-info">Jste první uživatel – získáte roli administrátora.</div><% } %>
   <% if (!open) { %>
     <div class="flash flash-error">Registrace nových uživatelů je momentálně vypnutá.</div>

@@ -3,14 +3,14 @@
 <% } else { %>
   </main>
   <% if (!wide) { %>
-  <aside class="rightbar">
+  <aside class="panel rightbar">
     <form class="searchbox" action="/search" method="get" role="search">
       <%- icon('search') %><input type="search" name="q" placeholder="Hledat příspěvky" value="<%= typeof q === 'string' ? q : '' %>" aria-label="Hledat">
     </form>
     <section class="card">
       <h3>Rubriky</h3>
       <% if (!allCategories.length) { %><p class="muted">Zatím žádné rubriky.</p><% } %>
-      <ul class="cat-list">
+      <ul class="side-list cat-list">
         <% allCategories.forEach(c => { %>
           <li><a href="/c/<%= c.slug %>"><span class="dot" style="--c:<%= c.color %>"></span><span>r/<%= c.name %></span><small><%= c.post_count %></small></a></li>
         <% }) %>
@@ -20,7 +20,7 @@
     <% if (trendingTags.length) { %>
     <section class="card">
       <h3>Trendy</h3>
-      <ul class="trend-list">
+      <ul class="side-list trend-list">
         <% trendingTags.forEach(t => { %>
           <li><a href="/t/<%= encodeURIComponent(t.name) %>"><strong>#<%= t.name %></strong><small class="muted"><%= t.n %> příspěvků</small></a></li>
         <% }) %>

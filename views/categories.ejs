@@ -4,7 +4,7 @@
   <% if (!allCategories.length) { %><div class="empty"><p>Zatím žádné rubriky.</p></div><% } %>
   <% allCategories.forEach(c => { %>
     <a class="cat-tile" href="/c/<%= c.slug %>" style="--c:<%= c.color %>">
-      <span class="cat-icon">r/</span>
+      <span class="disc cat-icon">r/</span>
       <span class="cat-tile-text"><strong>r/<%= c.name %></strong><small class="muted"><%= c.description || 'Bez popisu' %></small></span>
       <span class="cat-tile-count"><%= c.post_count %></span>
     </a>

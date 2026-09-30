@@ -1,7 +1,6 @@
 <%- include('partials/top') %>
 <div class="auth-card">
-  <a class="auth-logo" href="/"><img src="/icon.svg" alt="" width="48" height="48"></a>
-  <h1>Přihlášení do <%= settings.site_name %></h1>
+  <%- include('partials/auth-head', { heading: 'Přihlášení do ' + settings.site_name }) %>
   <% if (error) { %><div class="flash flash-error" role="alert"><%= error %></div><% } %>
   <form method="post" action="/login" class="form">
     <input type="hidden" name="_csrf" value="<%= csrf %>">

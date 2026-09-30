@@ -1,0 +1,9 @@
+<%# Konec bočního panelu editoru: popis změny + tlačítka. Parametry: editing, submitLabel, previewAction. %>
+<% if (editing) { %>
+  <label>Popis změny <span class="muted">(nepovinné)</span><input name="note" maxlength="200" placeholder="např. oprava překlepů"></label>
+<% } %>
+<div class="btn-col">
+  <button class="btn btn-primary btn-block"><%= submitLabel %></button>
+  <button class="btn btn-block" name="after" value="edit">Uložit a pokračovat</button>
+  <button class="btn btn-block" formaction="<%= previewAction %>" formtarget="_blank" formnovalidate data-no-queue><%- icon('eye') %> Náhled</button>
+</div>

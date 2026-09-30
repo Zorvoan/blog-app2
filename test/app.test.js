@@ -261,13 +261,15 @@ test('hromadné akce', async () => {
 });
 
 test('náhled neuloženého příspěvku a stránky (SSR)', async () => {
-  let r = await alice.post('/admin/preview', { type: 'post', title: 'Náhledový titulek', body: '# Nadpis\n- bod', category_id: catId });
+  let r = await alice.post('/admin/posts/preview', { title: 'Náhledový titulek', body: '# Nadpis\n- bod', category_id: catId });
   assert.equal(r.status, 200);
   assert.match(r.text, /Náhledový titulek/);
   assert.match(r.text, /<h2>Nadpis<\/h2>/);
   assert.match(r.text, /obsah zatím není uložen/);
-  r = await alice.post('/admin/preview', { type: 'page', title: 'Stránka X', body: 'obsah' });
+  r = await alice.post('/admin/pages/preview', { title: 'Stránka X', body: 'obsah' });
   assert.match(r.text, /Stránka X/);
+  r = await bob.post('/admin/pages/preview', { title: 'x', body: 'y' });
+  assert.equal(r.status, 403, 'náhled stránky jen pro administrátora');
   r = await alice.post('/admin/render', { body: '**b**' });
   assert.equal(r.text, '<p><strong>b</strong></p>');
 });

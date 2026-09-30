@@ -1,9 +1,5 @@
 <%- include('../partials/top') %>
-<div class="col-head sticky">
-  <a class="icon-btn" href="<%= base %>/<%= item.id %>/edit" aria-label="Zpět"><%- icon('back') %></a>
-  <h1>Historie změn</h1>
-  <div class="head-actions"><a class="btn btn-sm" href="<%= entity === 'post' ? '/p/' + item.id : '/pages/' + item.slug %>"><%- icon('eye') %> Zobrazit</a></div>
-</div>
+<%- include('../partials/edit-head', { back: base + '/' + item.id + '/edit', heading: 'Historie změn', viewHref: entity === 'post' ? '/p/' + item.id : '/pages/' + item.slug }) %>
 <div class="pad">
   <p><strong><%= item.title %></strong> · <%= revs.length %> revizí</p>
   <ol class="timeline">
@@ -22,10 +18,7 @@
             <h3><%= r.title %></h3>
             <div class="prose"><%- renderText(r.body) %></div>
             <% if (i > 0) { %>
-              <form method="post" action="<%= base %>/<%= item.id %>/revisions/<%= r.id %>/restore" data-confirm="Obnovit tuto verzi? Aktuální obsah zůstane v historii.">
-                <input type="hidden" name="_csrf" value="<%= csrf %>">
-                <button class="btn btn-sm"><%- icon('history') %> Obnovit tuto verzi</button>
-              </form>
+              <%- include('../partials/button-form', { action: base + '/' + item.id + '/revisions/' + r.id + '/restore', confirm: 'Obnovit tuto verzi? Aktuální obsah zůstane v historii.', btnClass: 'btn btn-sm', ic: 'history', text: 'Obnovit tuto verzi' }) %>
             <% } %>
           </div>
         </details>

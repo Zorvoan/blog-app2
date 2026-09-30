@@ -1,0 +1,11 @@
+<%# Hlavička editačních obrazovek. Parametry: back, heading, viewHref, historyHref (nepovinné). %>
+<div class="col-head sticky">
+  <a class="plain-btn icon-btn" href="<%= back %>" aria-label="Zpět"><%- icon('back') %></a>
+  <h1><%= heading %></h1>
+  <% if (locals.viewHref) { %>
+    <div class="head-actions">
+      <a class="btn btn-sm" href="<%= viewHref %>"><%- icon('eye') %> Zobrazit</a>
+      <% if (locals.historyHref) { %><a class="btn btn-sm" href="<%= historyHref %>"><%- icon('history') %> Historie</a><% } %>
+    </div>
+  <% } %>
+</div>

@@ -95,9 +95,10 @@ src/models.js          databázové dotazy
 src/auth.js            hesla, relace, CSRF
 src/permissions.js     pravidla oprávnění
 src/format.js          bezpečné formátování textu
-src/routes/            routy (veřejné, přihlášení, nastavení, administrace)
-views/                 EJS šablony (SSR)
-public/                CSS, klientský JS, service worker, manifest
+src/routes/            routy: veřejné, přihlášení, nastavení
+src/routes/admin/      administrace po sekcích (posts, pages, taxonomy, history, helpers)
+views/                 EJS šablony (SSR); opakované části v views/partials/
+public/                CSS, klientský JS, service worker, manifest, ikony (icons.svg)
 scripts/seed.js        ukázková data
 test/                  integrační testy (node:test)
 ```

@@ -14,8 +14,8 @@
           <td class="num"><a href="/admin/posts?category=<%= c.id %>"><%= c.post_count %></a></td>
           <td class="num"><%= c.sort_order %></td>
           <td class="row-actions">
-            <a class="icon-btn sm" href="/c/<%= c.slug %>" title="Zobrazit"><%- icon('eye') %></a>
-            <a class="icon-btn sm" href="/admin/categories/<%= c.id %>/edit" title="Upravit"><%- icon('edit') %></a>
+            <a class="plain-btn icon-btn sm" href="/c/<%= c.slug %>" title="Zobrazit"><%- icon('eye') %></a>
+            <a class="plain-btn icon-btn sm" href="/admin/categories/<%= c.id %>/edit" title="Upravit"><%- icon('edit') %></a>
           </td>
         </tr>
       <% }) %>

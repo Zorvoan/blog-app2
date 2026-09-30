@@ -12,11 +12,7 @@
   <form class="filters" method="get" action="/admin/posts">
     <% if (f.trash) { %><input type="hidden" name="trash" value="1"><% } %>
     <input type="search" name="q" value="<%= f.q %>" placeholder="Hledat…" aria-label="Hledat">
-    <select name="status" aria-label="Stav">
-      <option value="all">Všechny stavy</option>
-      <option value="published"<%= f.status === 'published' ? ' selected' : '' %>>Publikováno</option>
-      <option value="draft"<%= f.status === 'draft' ? ' selected' : '' %>>Koncept</option>
-    </select>
+    <%- include('../partials/status-select', { current: f.status, withAll: true }) %>
     <select name="category" aria-label="Rubrika">
       <option value="">Všechny rubriky</option>
       <option value="none"<%= f.category === 'none' ? ' selected' : '' %>>Bez rubriky</option>
@@ -77,12 +73,12 @@
           <td class="row-actions">
             <% if (f.trash) { %>
               <% if (perms.canDeletePost(user, p)) { %>
-                <button class="icon-btn sm" form="restore-<%= p.id %>" title="Obnovit" aria-label="Obnovit"><%- icon('sync') %></button>
+                <button class="plain-btn icon-btn sm" form="restore-<%= p.id %>" title="Obnovit" aria-label="Obnovit"><%- icon('sync') %></button>
               <% } %>
             <% } else { %>
-              <a class="icon-btn sm" href="/p/<%= p.id %>" title="Zobrazit"><%- icon('eye') %></a>
-              <% if (perms.canEditPost(user, p)) { %><a class="icon-btn sm" href="/admin/posts/<%= p.id %>/edit" title="Upravit"><%- icon('edit') %></a>
-              <a class="icon-btn sm" href="/admin/posts/<%= p.id %>/history" title="Historie"><%- icon('history') %></a><% } %>
+              <a class="plain-btn icon-btn sm" href="/p/<%= p.id %>" title="Zobrazit"><%- icon('eye') %></a>
+              <% if (perms.canEditPost(user, p)) { %><a class="plain-btn icon-btn sm" href="/admin/posts/<%= p.id %>/edit" title="Upravit"><%- icon('edit') %></a>
+              <a class="plain-btn icon-btn sm" href="/admin/posts/<%= p.id %>/history" title="Historie"><%- icon('history') %></a><% } %>
             <% } %>
           </td>
         </tr>

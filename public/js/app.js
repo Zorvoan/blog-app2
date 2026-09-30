@@ -8,7 +8,7 @@
 
   function toast(text, ms = 3500) {
     const el = document.createElement('div');
-    el.className = 'toast';
+    el.className = 'floating toast';
     el.setAttribute('role', 'status');
     el.textContent = text;
     document.body.append(el);

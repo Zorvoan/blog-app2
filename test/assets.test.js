@@ -44,3 +44,16 @@ test('CSS: žádný selektor není definovaný dvakrát a žádný obsah pravidl
     }
   }
 });
+
+test('CSS: žádná dvě pravidla nesdílí 5 a více stejných deklarací (patří do společné základní třídy)', () => {
+  const css = read('public/css/style.css').replace(/\/\*[\s\S]*?\*\//g, '').split('@media')[0];
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)]
+    .filter(([, sel]) => !sel.trim().startsWith(':root'))
+    .map(([, sel, body]) => [sel.trim().replace(/\s+/g, ' '), new Set(body.split(';').map((d) => d.trim().replace(/\s+/g, ' ')).filter(Boolean))]);
+  for (let i = 0; i < rules.length; i++) {
+    for (let j = i + 1; j < rules.length; j++) {
+      const shared = [...rules[i][1]].filter((d) => rules[j][1].has(d));
+      assert.ok(shared.length < 5, `"${rules[i][0]}" a "${rules[j][0]}" sdílí ${shared.length} deklarací: ${shared.join('; ')}`);
+    }
+  }
+});

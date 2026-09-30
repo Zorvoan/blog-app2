@@ -92,10 +92,17 @@ function backTo(req, fallback) {
   return fallback;
 }
 
-router.post('/p/:id/vote', requireLogin, (req, res, next) => {
+// Hlasovat a komentovat lze jen publikované příspěvky, které nejsou v koši.
+function loadPublishedPost(req, res, next) {
+  const post = req.app.locals.models.posts.raw(int(req.params.id));
+  if (!post || post.deleted_at || post.status !== 'published') return next('route');
+  req.post = post;
+  next();
+}
+
+router.post('/p/:id/vote', requireLogin, loadPublishedPost, (req, res) => {
   const { models } = req.app.locals;
-  const post = models.posts.raw(int(req.params.id));
-  if (!post || post.deleted_at || post.status !== 'published') return next();
+  const { post } = req;
   const value = req.body.value === '-1' ? -1 : 1;
   models.posts.vote(post.id, req.user.id, value);
   if (req.get('accept')?.includes('application/json')) {
@@ -105,10 +112,9 @@ router.post('/p/:id/vote', requireLogin, (req, res, next) => {
   res.redirect(303, backTo(req, `/p/${post.id}`) + `#post-${post.id}`);
 });
 
-router.post('/p/:id/comments', requireLogin, (req, res, next) => {
+router.post('/p/:id/comments', requireLogin, loadPublishedPost, (req, res) => {
   const { models, sessions } = req.app.locals;
-  const post = models.posts.raw(int(req.params.id));
-  if (!post || post.deleted_at || post.status !== 'published') return next();
+  const { post } = req;
   const body = str(req.body.body, 5000).trim();
   if (!body) sessions.flash(req, 'error', 'Komentář nesmí být prázdný.');
   else models.comments.create(post.id, req.user.id, body);

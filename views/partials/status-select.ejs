@@ -1,0 +1,7 @@
+<%# Výběr stavu (publikováno / koncept). Parametry: current, withAll (volba "všechny" pro filtry). %>
+<select name="status" aria-label="Stav">
+  <% if (locals.withAll) { %><option value="all">Všechny stavy</option><% } %>
+  <% [['published', 'Publikováno'], ['draft', 'Koncept']].forEach(([value, text]) => { %>
+    <option value="<%= value %>"<%= current === value ? ' selected' : '' %>><%= text %></option>
+  <% }) %>
+</select>

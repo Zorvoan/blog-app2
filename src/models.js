@@ -14,6 +14,15 @@ const likeEscape = (s) => String(s).replace(/[\\%_]/g, (c) => '\\' + c);
 const placeholders = (arr) => arr.map(() => '?').join(',');
 
 function createModels(db) {
+  // Unikátní adresa (slug) v dané tabulce: "o-nas", "o-nas-2", …
+  function uniqueSlug(table, input, fallback, exceptId = 0) {
+    const exists = db.prepare(`SELECT 1 FROM ${table} WHERE slug = ? AND id != ?`);
+    const base = slugify(input) || fallback;
+    let slug = base;
+    for (let n = 2; exists.get(slug, exceptId); n++) slug = `${base}-${n}`;
+    return slug;
+  }
+
   // ---------- nastavení ----------
   function getSettings() {
     const rows = db.prepare('SELECT key, value FROM settings').all();
@@ -65,12 +74,7 @@ function createModels(db) {
       FROM categories c ORDER BY c.sort_order, c.name`).all(),
     byId: (id) => db.prepare('SELECT * FROM categories WHERE id = ?').get(id),
     bySlug: (slug) => db.prepare('SELECT * FROM categories WHERE slug = ?').get(slug),
-    uniqueSlug(name, exceptId = 0) {
-      const base = slugify(name) || 'rubrika';
-      let slug = base;
-      for (let n = 2; db.prepare('SELECT 1 FROM categories WHERE slug = ? AND id != ?').get(slug, exceptId); n++) slug = `${base}-${n}`;
-      return slug;
-    },
+    uniqueSlug: (name, exceptId) => uniqueSlug('categories', name, 'rubrika', exceptId),
     create({ name, slug, description, color, sortOrder }, userId) {
       const r = db.prepare(
         'INSERT INTO categories (name, slug, description, color, sort_order, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
@@ -309,12 +313,7 @@ function createModels(db) {
     nav: () => db.prepare("SELECT title, slug FROM pages WHERE status = 'published' AND show_in_nav = 1 ORDER BY sort_order, title").all(),
     byId: (id) => db.prepare(`${PAGE_SELECT} WHERE pg.id = ?`).get(id),
     bySlug: (slug) => db.prepare(`${PAGE_SELECT} WHERE pg.slug = ?`).get(slug),
-    uniqueSlug(input, exceptId = 0) {
-      const base = slugify(input) || 'stranka';
-      let slug = base;
-      for (let n = 2; db.prepare('SELECT 1 FROM pages WHERE slug = ? AND id != ?').get(slug, exceptId); n++) slug = `${base}-${n}`;
-      return slug;
-    },
+    uniqueSlug: (input, exceptId) => uniqueSlug('pages', input, 'stranka', exceptId),
     create({ title, slug, body, status, showInNav, sortOrder }, userId) {
       return db.tx(() => {
         const t = now();

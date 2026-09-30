@@ -79,7 +79,15 @@ input[type="color"] { padding: 2px; height: 42px; }
 .narrow { max-width: 560px; }
 .narrow-only { display: var(--narrow-only, none); }
 
-.cat-list, .trend-list, .plain-list, .timeline { list-style: none; margin: 0; padding: 0; }
+/* Základní stavební bloky – společné vlastnosti jsou jen zde, konkrétní třídy je neopakují. */
+.plain-btn { border: 0; background: none; font: inherit; color: var(--muted); cursor: pointer; }
+.panel { position: sticky; top: 0; height: 100vh; overflow-y: auto; flex-direction: column; }
+.floating { position: fixed; left: 50%; transform: translateX(-50%); border-radius: var(--pill); box-shadow: var(--shadow); }
+.disc { display: inline-grid; place-items: center; flex: none; border-radius: 50%; color: #fff; }
+.media { display: flex; gap: 12px; padding: 12px 16px; border-bottom: var(--divider); }
+.side-list a { display: flex; padding: 8px 4px; border-radius: 8px; color: var(--text); }
+
+.side-list, .plain-list, .timeline { list-style: none; margin: 0; padding: 0; }
 .feed, .cat-grid { display: flex; flex-direction: column; }
 .form, .editor-main { display: flex; flex-direction: column; gap: 14px; }
 .banner-body > div, .post-main, .comment-main { flex: 1; min-width: 0; }
@@ -89,7 +97,7 @@ input[type="color"] { padding: 2px; height: 42px; }
 .card + .card, .danger-row { margin-top: 16px; }
 .prose > :first-child, .two-col .card + .card { margin-top: 0; }
 .plain-list li:last-child, .table tbody tr:last-child td { border-bottom: 0; }
-.nav a:hover, .me:hover, .cat-list a:hover, .trend-list a:hover, .tabs a:hover,
+.nav a:hover, .me:hover, .side-list a:hover, .tabs a:hover,
 .btn:hover, .icon-btn:hover, a.stat:hover { background: var(--bg-hover); text-decoration: none; }
 .post-card:not(.full):hover, .table tbody tr:hover { background: var(--bg-soft); }
 .icon-btn.danger:hover, .act-danger:hover { color: var(--danger); background: rgba(244, 33, 46, .1); }
@@ -103,10 +111,7 @@ input[type="color"] { padding: 2px; height: 42px; }
 .main { grid-column: 2; border-inline: var(--main-border, var(--divider)); min-width: 0; padding-bottom: 80px; }
 
 /* levý panel */
-.sidenav {
-  grid-column: 1; position: sticky; top: 0; height: 100vh; overflow-y: auto;
-  display: var(--sidenav-display, flex); flex-direction: column; align-items: var(--sidenav-align); gap: 6px; padding: 8px 12px 12px;
-}
+.sidenav { grid-column: 1; display: var(--sidenav-display, flex); align-items: var(--sidenav-align); gap: 6px; padding: 8px 12px 12px; }
 .brand { display: flex; align-items: center; gap: 10px; padding: 10px; font-weight: 800; font-size: 20px; color: var(--text); }
 .nav { display: flex; flex-direction: column; gap: 2px; }
 .nav a {
@@ -123,10 +128,7 @@ input[type="color"] { padding: 2px; height: 42px; }
 .guest { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
 
 /* pravý panel */
-.rightbar {
-  grid-column: 3; position: sticky; top: 0; height: 100vh; overflow-y: auto;
-  display: var(--rightbar-display, flex); flex-direction: column; gap: 16px; padding: 8px 16px 24px 28px;
-}
+.rightbar { grid-column: 3; display: var(--rightbar-display, flex); gap: 16px; padding: 8px 16px 24px 28px; }
 .searchbox {
   position: sticky; top: 0; display: flex; align-items: center; gap: 10px; padding: 0 16px;
   background: var(--bg-soft); border: 1px solid transparent; border-radius: var(--pill); color: var(--muted);
@@ -136,9 +138,9 @@ input[type="color"] { padding: 2px; height: 42px; }
 .card { background: var(--bg-soft); border-radius: var(--radius); padding: 14px 16px; }
 .card h3 { font-size: 19px; font-weight: 800; margin-bottom: 10px; }
 .card-more { display: block; margin-top: 10px; font-size: 14px; }
-.cat-list a { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-radius: 8px; color: var(--text); }
+.cat-list a { align-items: center; gap: 10px; }
 .cat-list small { margin-left: auto; color: var(--muted); }
-.trend-list a { display: flex; flex-direction: column; padding: 8px 4px; border-radius: 8px; color: var(--text); }
+.trend-list a { flex-direction: column; }
 .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--c); flex: none; }
 .site-foot { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 0 4px; font-size: 13px; color: var(--muted); }
 
@@ -176,10 +178,7 @@ input[type="color"] { padding: 2px; height: 42px; }
 .btn-danger:hover { background: #d81c28; }
 .btn-sm { padding: 5px 12px; font-size: 14px; }
 .btn-block { width: 100%; }
-.icon-btn {
-  display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px;
-  border: 0; border-radius: 50%; background: none; color: var(--text); cursor: pointer;
-}
+.icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%; color: var(--text); }
 .icon-btn.sm { --icon: 17px; width: 30px; height: 30px; color: var(--muted); }
 
 /* ================================================ formuláře a hlášky */
@@ -207,24 +206,20 @@ input[type="color"] { padding: 2px; height: 42px; }
 .banner.slim .cat-icon { margin-top: 0; border: 0; }
 .stats { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; }
 .cat-icon {
-  display: inline-grid; place-items: center; flex: none; width: var(--cat-size, 56px); height: var(--cat-size, 56px);
-  border-radius: 50%; background: var(--c, var(--accent)); color: #fff; font-weight: 800; font-size: calc(var(--cat-size, 56px) * .33);
+  width: var(--cat-size, 56px); height: var(--cat-size, 56px);
+  background: var(--c, var(--accent)); font-weight: 800; font-size: calc(var(--cat-size, 56px) * .33);
 }
 .welcome { margin: 12px 16px; }
 .welcome h2 { margin-bottom: 6px; }
 
 /* ================================================ avatar */
-.avatar {
-  --size: 40px; display: inline-grid; place-items: center; flex: none; width: var(--size); height: var(--size);
-  border-radius: 50%; background: var(--av, var(--muted)); color: #fff; font-weight: 700; font-size: calc(var(--size) * .42);
-}
+.avatar { --size: 40px; width: var(--size); height: var(--size); background: var(--av, var(--muted)); font-weight: 700; font-size: calc(var(--size) * .42); }
 .avatar:hover { filter: brightness(1.1); text-decoration: none; }
 .avatar-xl { --size: 88px; }
 .avatar-sm { --size: 30px; }
 .avatar-deleted { background: var(--line-strong); }
 
 /* ================================================ psaní příspěvku / komentáře */
-.composer { display: flex; gap: 12px; padding: 12px 16px; border-bottom: var(--divider); }
 .composer-main { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
 .composer-main input, .composer-main textarea { border: 0; padding: 6px 0; background: none; outline: none; }
 .composer-title { font-size: 19px; font-weight: 700; }
@@ -245,15 +240,12 @@ input[type="color"] { padding: 2px; height: 42px; }
 .tags { display: flex; flex-wrap: wrap; gap: 4px 10px; margin: var(--tags-margin, 6px 0); }
 .edited { --icon: 14px; display: flex; align-items: center; gap: 6px; margin: 6px 0; font-size: 13px; color: var(--muted); }
 .post-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 4px 0 0 -8px; }
-.act {
-  --icon: 18px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border: 0; border-radius: var(--pill);
-  background: none; color: var(--muted); font: inherit; font-size: 13px; cursor: pointer;
-}
+.act { --icon: 18px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: var(--pill); font-size: 13px; }
 .act:hover { color: var(--accent); background: var(--accent-soft); text-decoration: none; }
 
 /* hlasování */
 .vote { display: flex; flex-direction: column; align-items: center; width: 40px; flex: none; }
-.vote-btn { display: grid; place-items: center; width: 32px; height: 30px; padding: 0; border: 0; border-radius: 6px; background: none; color: var(--muted); cursor: pointer; }
+.vote-btn { display: grid; place-items: center; width: 32px; height: 30px; padding: 0; border-radius: 6px; }
 .vote-btn.on .icon { fill: currentColor; }
 .vote-btn.up.on { color: var(--up); }
 .vote-btn.down.on { color: var(--down); }
@@ -301,7 +293,7 @@ button.vote-btn.down:hover { color: var(--down); background: rgba(113, 147, 255,
 /* komentáře */
 .section-title { padding: 16px 16px 8px; font-size: 17px; font-weight: 800; }
 .comments { border-top: var(--divider); }
-.comment { --meta-justify: space-between; display: flex; gap: 12px; padding: 12px 16px; border-bottom: var(--divider); }
+.comment { --meta-justify: space-between; }
 
 /* stránky */
 .page-view { padding: 16px; font-size: 16px; }
@@ -330,11 +322,8 @@ button.vote-btn.down:hover { color: var(--down); background: rgba(113, 147, 255,
 .filters input[type="search"] { flex: 1; min-width: 160px; }
 .table-wrap { overflow-x: auto; border: var(--divider); border-radius: 12px; }
 .table { width: 100%; border-collapse: collapse; font-size: 14px; }
-.table td { padding: 10px 12px; border-bottom: var(--divider); text-align: left; vertical-align: middle; }
-.table th {
-  padding: 10px 12px; border-bottom: var(--divider); text-align: left; vertical-align: middle;
-  font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--bg-soft);
-}
+.table :is(th, td) { padding: 10px 12px; border-bottom: var(--divider); text-align: left; vertical-align: middle; }
+.table th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); background: var(--bg-soft); }
 .table .num { text-align: right; }
 .table .w-check { width: 36px; }
 .table .opt { display: var(--opt-col, table-cell); }
@@ -351,7 +340,7 @@ button.vote-btn.down:hover { color: var(--down); background: rgba(113, 147, 255,
 .btn-col { display: flex; flex-direction: column; gap: 8px; }
 .editor { border: 1px solid var(--line-strong); border-radius: 10px; overflow: hidden; }
 .editor-tabs { display: flex; align-items: center; gap: 2px; padding: 4px; background: var(--bg-soft); border-bottom: var(--divider); }
-.editor-tabs button { padding: 6px 12px; border: 0; border-radius: 6px; background: none; font: inherit; font-size: 14px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.editor-tabs button { padding: 6px 12px; border-radius: 6px; font-size: 14px; font-weight: 600; }
 .editor-tabs button.active { background: var(--bg); color: var(--text); box-shadow: 0 1px 2px rgba(0, 0, 0, .1); }
 .editor-count { margin-left: auto; padding-right: 8px; }
 .editor textarea { min-height: 280px; border: 0; border-radius: 0; outline: none; font-size: 16px; }
@@ -390,18 +379,15 @@ button.vote-btn.down:hover { color: var(--down); background: rgba(113, 147, 255,
 
 /* ================================================ offline oznámení */
 .floating-bar {
-  position: fixed; left: 50%; bottom: var(--bar-bottom); z-index: 50; transform: translateX(-50%);
-  display: flex; align-items: center; gap: 10px; max-width: calc(100% - 32px); padding: 10px 16px;
-  border-radius: var(--pill); box-shadow: var(--shadow); font-size: 14px;
+  bottom: var(--bar-bottom); z-index: 50; display: flex; align-items: center; gap: 10px;
+  max-width: calc(100% - 32px); padding: 10px 16px; font-size: 14px;
   background: var(--bar-bg); color: var(--bar-fg);
 }
 .net-banner { --bar-bottom: var(--banner-bottom); --bar-bg: var(--text); --bar-fg: var(--bg); }
 .outbox-banner { --bar-bottom: calc(var(--banner-bottom) + 54px); --bar-bg: var(--accent); --bar-fg: #fff; }
 .outbox-banner .btn { border: 0; background: #fff; color: var(--accent); }
 .toast {
-  position: fixed; left: 50%; top: 16px; z-index: 60; transform: translateX(-50%);
-  padding: 10px 18px; border-radius: var(--pill); box-shadow: var(--shadow);
-  background: var(--accent); color: #fff; font-weight: 600;
+  top: 16px; z-index: 60; padding: 10px 18px; background: var(--accent); color: #fff; font-weight: 600;
 }
 
 /* ================================================ responzivita
