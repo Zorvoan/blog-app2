@@ -175,18 +175,37 @@ test('příspěvky: autor upravuje svůj příspěvek, vzniká revize', async ()
   assert.match(r.text, /oprava/);
 });
 
-test('příspěvky: administrátor smí upravit cizí příspěvek', async () => {
+test('příspěvky: upravit a smazat smí jen autor – ani administrátor ne', async () => {
   let r = await bob.post('/admin/posts', { title: 'Bobův příspěvek', body: 'text', status: 'published' });
   const id = Number(r.location.match(/\/p\/(\d+)/)[1]);
   r = await bob.get(`/admin/posts/${id}/edit`);
-  assert.equal(r.status, 200, 'vlastní příspěvek upravit smí');
+  assert.equal(r.status, 200, 'autor smí upravit svůj příspěvek');
+
+  // alice je administrátor, přesto cizí příspěvek upravit ani smazat nesmí
   r = await alice.get(`/admin/posts/${id}/edit`);
-  assert.equal(r.status, 200);
-  assert.match(r.text, /Jako administrátor upravujete příspěvek uživatele/);
+  assert.equal(r.status, 403);
   r = await alice.post(`/admin/posts/${id}`, { title: 'Moderováno', body: 'text', status: 'published' });
+  assert.equal(r.status, 403);
+  r = await alice.post(`/admin/posts/${id}/trash`);
+  assert.equal(r.status, 403);
+  r = await alice.get(`/admin/posts/${id}/history`);
+  assert.equal(r.status, 404);
+  const bulk = new URLSearchParams({ _csrf: await alice.csrfAny(), action: 'trash', back: '/admin/posts', ids: String(id) });
+  r = await alice.req('POST', '/admin/posts/bulk', bulk);
+  r = await anon.get(`/p/${id}`);
+  assert.equal(r.status, 200, 'hromadná akce cizí příspěvek nesmaže');
+  assert.match(r.text, /Bobův příspěvek/);
+  assert.doesNotMatch(r.text, /Moderováno/);
+  r = await alice.get(`/p/${id}`);
+  assert.doesNotMatch(r.text, new RegExp(`/admin/posts/${id}/edit`), 'admin nevidí odkaz Upravit');
+  r = await alice.get('/admin/posts');
+  assert.doesNotMatch(r.text, /Bobův příspěvek/, 've správě jsou jen vlastní příspěvky');
+
+  // autor svůj příspěvek smaže
+  r = await bob.post(`/admin/posts/${id}/trash`);
   assert.equal(r.status, 303);
   r = await anon.get(`/p/${id}`);
-  assert.match(r.text, /Naposledy upravil\(a\) <a href="\/u\/alice">/);
+  assert.equal(r.status, 404);
 });
 
 test('příspěvky: obnovení revize', async () => {

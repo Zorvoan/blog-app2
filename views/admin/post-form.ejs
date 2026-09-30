@@ -1,5 +1,5 @@
 <%- include('../partials/top') %>
-<% const editing = !!post; const own = !editing || perms.canDeletePost(user, post); %>
+<% const editing = !!post; %>
 <div class="col-head sticky">
   <a class="icon-btn" href="/admin/posts" aria-label="Zpět"><%- icon('back') %></a>
   <h1><%= editing ? 'Upravit příspěvek' : 'Nový příspěvek' %></h1>
@@ -12,9 +12,6 @@
 </div>
 <div class="pad">
   <%- include('../partials/errors') %>
-  <% if (editing && post.author_id !== user.id) { %>
-    <div class="flash flash-info">Jako administrátor upravujete příspěvek uživatele <strong>@<%= post.username || 'smazaný' %></strong>. Změna bude zaznamenána v historii revizí a lze ji kdykoliv vrátit.</div>
-  <% } %>
   <form method="post" action="<%= editing ? '/admin/posts/' + post.id : '/admin/posts' %>" class="form editor-layout" data-offline-queue="<%= editing ? 'Úprava příspěvku' : 'Nový příspěvek' %>">
     <input type="hidden" name="_csrf" value="<%= csrf %>">
     <input type="hidden" name="type" value="post">
@@ -25,16 +22,12 @@
       <%- include('../partials/editor', { value: form.body }) %>
     </div>
     <aside class="editor-side card">
-      <% if (own) { %>
-        <label>Stav
-          <select name="status">
-            <option value="published"<%= form.status === 'published' ? ' selected' : '' %>>Publikováno</option>
-            <option value="draft"<%= form.status === 'draft' ? ' selected' : '' %>>Koncept</option>
-          </select>
-        </label>
-      <% } else { %>
-        <p class="muted small">Stav: <strong><%= post.status === 'draft' ? 'Koncept' : 'Publikováno' %></strong> (mění jen autor)</p>
-      <% } %>
+      <label>Stav
+        <select name="status">
+          <option value="published"<%= form.status === 'published' ? ' selected' : '' %>>Publikováno</option>
+          <option value="draft"<%= form.status === 'draft' ? ' selected' : '' %>>Koncept</option>
+        </select>
+      </label>
       <label>Rubrika
         <select name="category_id">
           <option value="">Bez rubriky</option>

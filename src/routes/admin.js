@@ -24,14 +24,14 @@ router.get('/', (req, res) => {
   res.render('admin/dashboard', {
     title: 'Administrace', wide: true, admin,
     counts: {
-      ...models.posts.counts(admin ? null : req.user.id),
+      ...models.posts.counts(req.user.id),
       pages: models.pages.count(),
       categories: res.locals.allCategories.length,
       comments: models.comments.count(),
       users: models.users.count(),
     },
     mine: mine.items,
-    activity: models.revisions.recent(12, admin ? null : req.user.id),
+    activity: models.revisions.recent(12, req.user.id, admin),
   });
 });
 
@@ -73,8 +73,6 @@ router.get('/posts', (req, res) => {
     q: str(req.query.q, 200).trim(),
     status: ['published', 'draft'].includes(req.query.status) ? req.query.status : 'all',
     category: req.query.category === 'none' ? 'none' : int(req.query.category) || '',
-    // Běžný uživatel vidí ve správě jen své příspěvky.
-    mine: req.query.mine === '1' || !perms.isAdmin(req.user),
     trash: req.query.trash === '1',
     sort: ['updated', 'new', 'top', 'title'].includes(req.query.sort) ? req.query.sort : 'updated',
   };
@@ -82,12 +80,13 @@ router.get('/posts', (req, res) => {
   const page = Math.max(1, int(req.query.page, 1));
   const { items, total } = models.posts.list({
     viewer: req.user, q: f.q, status: f.status, categoryId: f.category || undefined,
-    authorId: f.mine ? req.user.id : undefined, trash: f.trash, sort: f.sort,
+    // Ve správě má každý (i administrátor) jen své příspěvky – cizí upravovat ani mazat nesmí.
+    authorId: req.user.id, trash: f.trash, sort: f.sort,
     limit: perPage, offset: (page - 1) * perPage,
   });
   res.render('admin/posts', {
     title: 'Příspěvky', wide: true, posts: items, total, f, page,
-    totalPages: Math.max(1, Math.ceil(total / perPage)), counts: models.posts.counts(perms.isAdmin(req.user) ? null : req.user.id),
+    totalPages: Math.max(1, Math.ceil(total / perPage)), counts: models.posts.counts(req.user.id),
   });
 });
 
@@ -122,7 +121,7 @@ function loadPost(req, res, next) {
 
 router.get('/posts/:id/edit', loadPost, (req, res) => {
   const { post } = req;
-  if (!perms.canEditPost(req.user, post)) return denied(res, 'Tento příspěvek nemůžete upravovat.');
+  if (!perms.canEditPost(req.user, post)) return denied(res, 'Příspěvek může upravit jen jeho autor.');
   renderPostForm(res, {
     post,
     form: { title: post.title, body: post.body, category_id: post.category_id || '', status: post.status, tags: post.tags.join(', '), pinned: !!post.pinned },
@@ -132,18 +131,18 @@ router.get('/posts/:id/edit', loadPost, (req, res) => {
 router.post('/posts/:id', loadPost, (req, res) => {
   const { models, sessions } = req.app.locals;
   const { post } = req;
-  if (!perms.canEditPost(req.user, post)) return denied(res, 'Tento příspěvek nemůžete upravovat.');
+  if (!perms.canEditPost(req.user, post)) return denied(res, 'Příspěvek může upravit jen jeho autor.');
   const { data, errors } = readPost(req.body, models);
   if (!perms.canPinPost(req.user)) data.pinned = !!post.pinned;
   if (errors.length) return renderPostForm(res, { post, form: { ...req.body, pinned: data.pinned }, errors, statusCode: 422 });
   models.posts.update(post.id, data, req.user.id);
-  sessions.flash(req, 'success', post.author_id === req.user.id ? 'Změny byly uloženy.' : `Upravili jste příspěvek uživatele @${post.username ?? 'smazaný'}.`);
+  sessions.flash(req, 'success', 'Změny byly uloženy.');
   res.redirect(303, req.body.after === 'edit' ? `/admin/posts/${post.id}/edit` : `/p/${post.id}`);
 });
 
 router.post('/posts/:id/trash', loadPost, (req, res) => {
   const { models, sessions } = req.app.locals;
-  if (!perms.canDeletePost(req.user, req.post)) return denied(res, 'Smazat příspěvek může jen jeho autor nebo administrátor.');
+  if (!perms.canDeletePost(req.user, req.post)) return denied(res, 'Příspěvek může smazat jen jeho autor.');
   models.posts.trash([req.post.id]);
   sessions.flash(req, 'success', 'Příspěvek byl přesunut do koše.');
   res.redirect(303, '/admin/posts');
@@ -151,7 +150,7 @@ router.post('/posts/:id/trash', loadPost, (req, res) => {
 
 router.post('/posts/:id/restore', loadPost, (req, res) => {
   const { models, sessions } = req.app.locals;
-  if (!perms.canDeletePost(req.user, req.post)) return denied(res);
+  if (!perms.canDeletePost(req.user, req.post)) return denied(res, 'Příspěvek může obnovit jen jeho autor.');
   models.posts.restore([req.post.id]);
   sessions.flash(req, 'success', 'Příspěvek byl obnoven z koše.');
   res.redirect(303, '/admin/posts?trash=1');
@@ -159,7 +158,7 @@ router.post('/posts/:id/restore', loadPost, (req, res) => {
 
 router.post('/posts/:id/destroy', loadPost, (req, res) => {
   const { models, sessions } = req.app.locals;
-  if (!perms.canDeletePost(req.user, req.post)) return denied(res);
+  if (!perms.canDeletePost(req.user, req.post)) return denied(res, 'Příspěvek může smazat jen jeho autor.');
   models.posts.destroy([req.post.id]);
   sessions.flash(req, 'success', 'Příspěvek byl trvale smazán.');
   res.redirect(303, '/admin/posts?trash=1');

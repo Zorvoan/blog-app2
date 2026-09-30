@@ -1,9 +1,10 @@
 'use strict';
 
 // Pravidla oprávnění:
-//  - běžný uživatel spravuje jen svůj obsah (příspěvky, komentáře, profil),
-//  - administrátor může upravovat a mazat obsah kohokoliv a spravuje
-//    stránky, rubriky, štítky, uživatele a nastavení webu.
+//  - příspěvek smí upravit a smazat POUZE jeho autor – ani administrátor
+//    nemůže měnit ani mazat cizí příspěvky,
+//  - komentáře maže autor nebo administrátor (moderace diskuze),
+//  - administrátor navíc spravuje stránky, rubriky, štítky, uživatele a nastavení webu.
 // Každá úprava se ukládá do historie revizí, takže ji lze vrátit.
 
 const isAdmin = (user) => user?.role === 'admin';
@@ -12,8 +13,8 @@ const isOwner = (user, authorId) => !!user && authorId != null && user.id === au
 module.exports = {
   isAdmin,
   canViewPost: (user, post) => post.status === 'published' || isOwner(user, post.author_id) || isAdmin(user),
-  canEditPost: (user, post) => isOwner(user, post.author_id) || isAdmin(user),
-  canDeletePost: (user, post) => isOwner(user, post.author_id) || isAdmin(user),
+  canEditPost: (user, post) => isOwner(user, post.author_id),
+  canDeletePost: (user, post) => isOwner(user, post.author_id),
   canPinPost: (user) => isAdmin(user),
 
   canViewPage: (user, page) => page.status === 'published' || isAdmin(user),

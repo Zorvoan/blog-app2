@@ -50,7 +50,8 @@ Testy: `npm test`
 |---|---|---|
 | psát příspěvky a komentáře, hlasovat | ✔ | ✔ |
 | upravovat / mazat **své** příspěvky a komentáře | ✔ | ✔ |
-| upravovat / mazat **cizí** příspěvky a komentáře | ✘ | ✔ |
+| upravovat / mazat **cizí** příspěvky | ✘ | ✘ |
+| mazat **cizí** komentáře (moderace) | ✘ | ✔ |
 | stránky, rubriky, štítky | ✘ | ✔ |
 | uživatelé a nastavení webu | ✘ | ✔ |
 
@@ -62,7 +63,7 @@ Testy: `npm test`
 - hromadné akce (publikovat, koncept, přesun do rubriky, koš, obnovení, smazání)
 - filtrování, vyhledávání, řazení, stránkování
 - hlasování nahoru/dolů (Reddit), karma, komentáře
-- **úpravy cizích příspěvků** smí jen administrátor; u příspěvku je vidět, kdo ho naposledy upravil.
+- příspěvek smí **upravit a smazat pouze jeho autor** – ani administrátor nemůže měnit cizí příspěvky
   Každá změna se ukládá do **historie revizí** (kdo, kdy, popis změny) a libovolnou verzi lze obnovit.
 
 **Stránky** – vytvoření, úprava, smazání, vlastní adresa (slug), koncept, zobrazení v navigaci,

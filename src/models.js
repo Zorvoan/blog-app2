@@ -149,12 +149,13 @@ function createModels(db) {
       FROM revisions r LEFT JOIN users u ON u.id = r.editor_id
       WHERE r.entity = ? AND r.entity_id = ? ORDER BY r.id DESC`).all(entity, entityId),
     byId: (entity, entityId, id) => db.prepare('SELECT * FROM revisions WHERE entity = ? AND entity_id = ? AND id = ?').get(entity, entityId, id),
-    // authorId = jen změny příspěvků daného autora (přehled běžného uživatele).
-    recent: (limit = 10, authorId = null) => db.prepare(`
+    // Změny příspěvků daného autora; withPages = navíc změny stránek (přehled administrátora).
+    recent: (limit, authorId, withPages = false) => db.prepare(`
       SELECT r.id, r.entity, r.entity_id, r.title, r.note, r.created_at, u.username editor_username, u.display_name editor_name
       FROM revisions r LEFT JOIN users u ON u.id = r.editor_id
-      WHERE ? IS NULL OR (r.entity = 'post' AND r.entity_id IN (SELECT id FROM posts WHERE author_id = ?))
-      ORDER BY r.id DESC LIMIT ?`).all(authorId, authorId, limit),
+      WHERE (r.entity = 'post' AND r.entity_id IN (SELECT id FROM posts WHERE author_id = ?))
+         OR (? AND r.entity = 'page')
+      ORDER BY r.id DESC LIMIT ?`).all(authorId, withPages ? 1 : 0, limit),
     removeFor: (entity, entityId) => db.prepare('DELETE FROM revisions WHERE entity = ? AND entity_id = ?').run(entity, entityId),
   };
 
