@@ -208,6 +208,39 @@ test('příspěvky: upravit a smazat smí jen autor – ani administrátor ne', 
   assert.equal(r.status, 404);
 });
 
+test('oprávnění: cizí příspěvek nejde změnit žádnou cestou (běžný uživatel i administrátor)', async () => {
+  let r = await bob.post('/admin/posts', { title: 'Cizí příspěvek', body: 'původní', status: 'published' });
+  const id = r.location.match(/\/p\/(\d+)/)[1];
+  r = await bob.get(`/admin/posts/${id}/history`);
+  const rid = r.text.match(/revisions\/(\d+)\/restore/)?.[1] || '1';
+  const other = client();
+  await other.post('/register', { username: 'marekjancik', password: 'heslo1234', password_confirm: 'heslo1234' });
+
+  for (const [who, c] of [['běžný uživatel', other], ['administrátor', alice]]) {
+    const attempts = {
+      'úprava (formulář)': [403, () => c.get(`/admin/posts/${id}/edit`)],
+      uložení: [403, () => c.post(`/admin/posts/${id}`, { title: 'HACK', body: 'HACK', status: 'published' })],
+      koš: [403, () => c.post(`/admin/posts/${id}/trash`)],
+      obnova: [403, () => c.post(`/admin/posts/${id}/restore`)],
+      'trvalé smazání': [403, () => c.post(`/admin/posts/${id}/destroy`)],
+      historie: [404, () => c.get(`/admin/posts/${id}/history`)],
+      'obnova revize': [404, () => c.post(`/admin/posts/${id}/revisions/${rid}/restore`)],
+    };
+    for (const a of ['publish', 'draft', 'move', 'trash', 'restore', 'destroy']) {
+      attempts[`hromadně ${a}`] = [403, () => c.post('/admin/posts/bulk', { action: a, ids: id, category_id: 'none', back: '/admin/posts' })];
+    }
+    for (const [name, [expected, run]] of Object.entries(attempts)) {
+      assert.equal((await run()).status, expected, `${who}: ${name}`);
+    }
+    r = await c.get(`/p/${id}`);
+    assert.doesNotMatch(r.text, new RegExp(`/admin/posts/${id}/(edit|trash|history)`), `${who}: žádné odkazy na úpravu`);
+  }
+  r = await anon.get(`/p/${id}`);
+  assert.match(r.text, /Cizí příspěvek/);
+  assert.match(r.text, /původní/);
+  assert.doesNotMatch(r.text, /HACK/);
+});
+
 test('příspěvky: obnovení revize', async () => {
   let r = await alice.get(`/admin/posts/${postId}/history`);
   const ids = [...r.text.matchAll(/revisions\/(\d+)\/restore/g)].map((m) => m[1]);

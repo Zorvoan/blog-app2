@@ -29,7 +29,7 @@
     <% } %>
     <footer class="site-foot">
       <% navPages.forEach(p => { %><a class="muted" href="/pages/<%= p.slug %>"><%= p.title %></a><% }) %>
-      <span>© <%= new Date().getFullYear() %> <%= settings.site_name %></span>
+      <span>© <%= new Date().getFullYear() %> <%= settings.site_name %> · verze <%= appVersion %></span>
     </footer>
   </aside>
   <% } %>

@@ -6,7 +6,7 @@ const express = require('express');
 const { readPost, str, int } = require('../../forms');
 const { parseTags } = require('../../format');
 const perms = require('../../permissions');
-const { done, load, allow, idsFrom, afterSave } = require('./helpers');
+const { denied, done, load, allow, idsFrom, afterSave } = require('./helpers');
 const { addHistoryRoutes } = require('./history');
 
 const router = express.Router();
@@ -84,13 +84,14 @@ router.post('/bulk', (req, res) => {
   if (req.body.action === 'move' && int(req.body.category_id) && !models.categories.byId(int(req.body.category_id))) {
     return done(req, res, back, 'Zvolená rubrika neexistuje.', 'error');
   }
-  const targets = ids.map((id) => models.posts.raw(id))
-    .filter((p) => p && perms.canEditPost(req.user, p) && action.applies(p))
-    .map((p) => p.id);
+  const posts = ids.map((id) => models.posts.raw(id)).filter(Boolean);
+  // Obsahuje-li výběr cizí příspěvek, celá akce se odmítne (nic se neprovede).
+  if (posts.some((p) => !perms.canEditPost(req.user, p))) return denied(res, 'Příspěvek může upravit jen jeho autor.');
+  const targets = posts.filter(action.applies).map((p) => p.id);
   if (targets.length) action.run(models, targets, req);
   const skipped = ids.length - targets.length;
   done(req, res, back,
-    `Hotovo: ${targets.length} příspěvků.` + (skipped ? ` Přeskočeno ${skipped} (cizí příspěvek nebo nevhodný stav).` : ''),
+    `Hotovo: ${targets.length} příspěvků.` + (skipped ? ` Přeskočeno ${skipped} (nevhodný stav, např. už v koši).` : ''),
     targets.length ? 'success' : 'error');
 });
 

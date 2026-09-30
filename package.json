@@ -1,6 +1,6 @@
 {
   "name": "blog-app2",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "description": "Blogový systém s administrací ve stylu Twitter/Reddit – SSR, lokální SQLite, offline režim",
   "main": "server.js",
   "private": true,

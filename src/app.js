@@ -25,7 +25,7 @@ function createApp({ dbFile = process.env.DB_FILE || path.join(ROOT, 'data', 'bl
   app.disable('x-powered-by');
   app.locals.models = models;
   app.locals.sessions = sessions;
-  Object.assign(app.locals, fmt, { perms, icon, newKey });
+  Object.assign(app.locals, fmt, { perms, icon, newKey, appVersion: require('../package.json').version });
 
   // Vše se servíruje lokálně – žádné CDN ani externí zdroje.
   app.use((req, res, next) => {
